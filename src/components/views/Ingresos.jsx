@@ -6,7 +6,7 @@ import { fmtCLP, fmtDate } from '../../utils/formatters.js';
 import { catColor, catLabel } from '../../utils/categories.js';
 
 export function Ingresos({ filteredTx, categoryMeta, onEdit, onAdd }) {
-  const txs   = filteredTx.filter(t => t.type === 'pos');
+  const txs   = filteredTx.filter(t => t.bucket === 'income');
   const total  = txs.reduce((s, t) => s + t.amount, 0);
 
   const byCategory = useMemo(() => {

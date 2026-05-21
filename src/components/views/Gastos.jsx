@@ -8,7 +8,7 @@ import { catColor, catLabel } from '../../utils/categories.js';
 export function Gastos({ filteredTx, categoryMeta, onEdit }) {
   const [openCat, setOpenCat] = useState(null);
 
-  const txs   = filteredTx.filter(t => t.type === 'neg');
+  const txs   = filteredTx.filter(t => t.bucket === 'expense_op');
   const total  = txs.reduce((s, t) => s + Math.abs(t.amount), 0);
 
   const categories = useMemo(() => {

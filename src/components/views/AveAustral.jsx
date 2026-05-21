@@ -5,16 +5,14 @@ import { BarChart } from '../charts/BarChart.jsx';
 import { fmtCLP, fmtDate } from '../../utils/formatters.js';
 import { catColor, catLabel } from '../../utils/categories.js';
 
-const PROP_ID = 'ave_austral';
-
 export function AveAustral({ filteredTx, categoryMeta, onEdit }) {
-  const txs = filteredTx.filter(t => t.property === PROP_ID);
-  const ing  = txs.filter(t => t.type === 'pos').reduce((s, t) => s + t.amount, 0);
-  const cos  = txs.filter(t => t.type === 'neg').reduce((s, t) => s + Math.abs(t.amount), 0);
+  const txs = filteredTx.filter(t => t.category === 'ARTESANIAS');
+  const ing  = txs.filter(t => t.bucket === 'income').reduce((s, t) => s + t.amount, 0);
+  const cos  = txs.filter(t => t.bucket === 'expense_op').reduce((s, t) => s + Math.abs(t.amount), 0);
 
   const slices = useMemo(() => {
     const map = {};
-    txs.filter(t => t.type === 'neg').forEach(t => { map[t.category] = (map[t.category] ?? 0) + Math.abs(t.amount); });
+    txs.filter(t => t.bucket === 'expense_op').forEach(t => { map[t.category] = (map[t.category] ?? 0) + Math.abs(t.amount); });
     return Object.entries(map).map(([k, v]) => ({ label: catLabel(categoryMeta, k), value: v, color: catColor(categoryMeta, k) })).sort((a, b) => b.value - a.value);
   }, [txs, categoryMeta]);
 
@@ -71,7 +69,7 @@ export function AveAustral({ filteredTx, categoryMeta, onEdit }) {
         <div className="v-tx-list">
           {txs.length === 0 && <div className="v-empty">Sin movimientos para Ave Austral en este período.</div>}
           {txs.map((t, i) => {
-            const isPos = t.type === 'pos';
+            const isPos = t.bucket === 'income';
             return (
               <div key={t.id} className="v-tx-row" onClick={() => onEdit(t)} style={{ animationDelay: (i * 40) + 'ms' }}>
                 <div className="v-tx-icon" style={{ background: isPos ? 'rgba(24,160,88,.12)' : 'rgba(212,58,42,.10)', color: isPos ? 'var(--signal-pos)' : 'var(--signal-neg)' }}>

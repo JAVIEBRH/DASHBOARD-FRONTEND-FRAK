@@ -7,8 +7,8 @@ export function Calendar({ filteredTx, monthsOrder, monthLabels, categoryMeta, o
   const byMonth = useMemo(() => {
     return monthsOrder.map(m => {
       const txs = filteredTx.filter(t => t.month === m);
-      const ing = txs.filter(t => t.type === 'pos').reduce((s, t) => s + t.amount, 0);
-      const cos = txs.filter(t => t.type === 'neg').reduce((s, t) => s + t.amount, 0);
+      const ing = txs.filter(t => t.bucket === 'income').reduce((s, t) => s + t.amount, 0);
+      const cos = txs.filter(t => t.bucket === 'expense_op').reduce((s, t) => s + t.amount, 0);
       return { m, txs, ing, cos, net: ing + cos, label: monthLabels?.[m] ?? m };
     }).filter(x => x.txs.length > 0);
   }, [filteredTx, monthsOrder, monthLabels]);
@@ -43,7 +43,7 @@ export function Calendar({ filteredTx, monthsOrder, monthLabels, categoryMeta, o
           </div>
           <div className="v-tx-list">
             {txs.map((t, i) => {
-              const isPos = t.type === 'pos';
+              const isPos = t.bucket === 'income';
               return (
                 <div key={t.id} className="v-tx-row" onClick={() => onEdit(t)} style={{ animationDelay: (i * 30) + 'ms' }}>
                   <div className="v-tx-icon" style={{ background: isPos ? 'rgba(24,160,88,.12)' : 'rgba(212,58,42,.10)', color: isPos ? 'var(--signal-pos)' : 'var(--signal-neg)' }}>

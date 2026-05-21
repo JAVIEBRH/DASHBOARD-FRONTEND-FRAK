@@ -10,8 +10,9 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
   const [catTab, setCatTab] = useState('expense');
 
   const txs = filteredTx;
-  const income    = txs.filter(t => t.type === 'pos').reduce((s, t) => s + t.amount, 0);
-  const expenseOp = txs.filter(t => t.type === 'neg').reduce((s, t) => s + t.amount, 0);
+  const income    = txs.filter(t => t.bucket === 'income').reduce((s, t) => s + t.amount, 0);
+  const expenseOp = txs.filter(t => t.bucket === 'expense_op').reduce((s, t) => s + t.amount, 0);
+  const retiroSocio = txs.filter(t => t.bucket === 'retiro_socio').reduce((s, t) => s + t.amount, 0);
   const margen    = income + expenseOp;
   const margenPct = income > 0 ? (margen / income) * 100 : 0;
 
@@ -20,18 +21,18 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
   const netParts = fmtCLPParts(margen, { compact: true });
 
   const allMonthLabels = monthsOrder.map(m => monthLabels?.[m] ?? m);
-  const monthlyIncome    = monthsOrder.map(m => txs.filter(t => t.month === m && t.type === 'pos').reduce((s, t) => s + t.amount, 0));
-  const monthlyExpenseOp = monthsOrder.map(m => txs.filter(t => t.month === m && t.type === 'neg').reduce((s, t) => s + Math.abs(t.amount), 0));
+  const monthlyIncome    = monthsOrder.map(m => txs.filter(t => t.month === m && t.bucket === 'income').reduce((s, t) => s + t.amount, 0));
+  const monthlyExpenseOp = monthsOrder.map(m => txs.filter(t => t.month === m && t.bucket === 'expense_op').reduce((s, t) => s + Math.abs(t.amount), 0));
 
   const byIncCat = useMemo(() => {
     const map = {};
-    txs.filter(t => t.type === 'pos').forEach(t => { map[t.category] = (map[t.category] ?? 0) + t.amount; });
+    txs.filter(t => t.bucket === 'income').forEach(t => { map[t.category] = (map[t.category] ?? 0) + t.amount; });
     return Object.entries(map).map(([k, v]) => ({ label: catLabel(categoryMeta, k), value: v, color: catColor(categoryMeta, k), cat: k })).sort((a, b) => b.value - a.value);
   }, [txs, categoryMeta]);
 
   const byExpCat = useMemo(() => {
     const map = {};
-    txs.filter(t => t.type === 'neg').forEach(t => { map[t.category] = (map[t.category] ?? 0) + Math.abs(t.amount); });
+    txs.filter(t => t.bucket === 'expense_op').forEach(t => { map[t.category] = (map[t.category] ?? 0) + Math.abs(t.amount); });
     return Object.entries(map).map(([k, v]) => ({ label: catLabel(categoryMeta, k), value: v, color: catColor(categoryMeta, k), cat: k })).sort((a, b) => b.value - a.value);
   }, [txs, categoryMeta]);
 
@@ -42,8 +43,8 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
 
   const monthAgg = monthsOrder.map(m => {
     const mt = txs.filter(t => t.month === m);
-    const ing = mt.filter(t => t.type === 'pos').reduce((s, t) => s + t.amount, 0);
-    const cos = mt.filter(t => t.type === 'neg').reduce((s, t) => s + t.amount, 0);
+    const ing = mt.filter(t => t.bucket === 'income').reduce((s, t) => s + t.amount, 0);
+    const cos = mt.filter(t => t.bucket === 'expense_op').reduce((s, t) => s + t.amount, 0);
     return { m, label: monthLabels?.[m] ?? m, net: ing + cos, ing, cos };
   }).filter(x => x.ing !== 0 || x.cos !== 0);
 
@@ -74,14 +75,30 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
         <div className="v-kpi-cell">
           <div className="v-kpi-label"><Icon name="arrow_up" size={11} /> Ingreso bruto</div>
           <div className="v-kpi-value pos"><span className="currency">$</span>{incParts.body}</div>
-          <div className="v-kpi-sub">{fmtCLP(income, { sign: false })} · {txs.filter(t => t.type === 'pos').length} entradas</div>
+          <div className="v-kpi-sub">{fmtCLP(income, { sign: false })} · {txs.filter(t => t.bucket === 'income').length} entradas</div>
         </div>
         <div className="v-kpi-cell">
-          <div className="v-kpi-label"><Icon name="arrow_down" size={11} /> Gasto operativo</div>
+          <div className="v-kpi-label"><Icon name="arrow_down" size={11} /> Gasto operativo real</div>
           <div className="v-kpi-value neg"><span className="currency">$</span>{cosParts.body}</div>
-          <div className="v-kpi-sub">{fmtCLP(expenseOp)} · {txs.filter(t => t.type === 'neg').length} salidas</div>
+          <div className="v-kpi-sub">{fmtCLP(expenseOp)} · sin retiros de socio</div>
         </div>
       </div>
+
+      {retiroSocio !== 0 && (
+        <div className="v-card" style={{ marginBottom: 24, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 20, borderColor: 'var(--line)' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--socio)', color: '#fff', display: 'grid', placeItems: 'center' }}>
+            <Icon name="wallet" size={17} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 3 }}>
+              Movimientos de socio · No afectan rentabilidad operativa
+            </div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              Retirado en anticipos y remesas: <em style={{ color: 'var(--socio)', fontStyle: 'italic' }}>{fmtCLP(Math.abs(retiroSocio), { sign: false, compact: true })}</em>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="v-grid-2">
         <div className="v-card">
@@ -170,11 +187,15 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
         <div className="v-tx-list">
           {recent.length === 0 && <div className="v-empty">Sin movimientos en este período.</div>}
           {recent.map((t, i) => {
-            const isPos = t.type === 'pos';
+            const isIncome = t.bucket === 'income';
+            const isSocio  = t.bucket === 'retiro_socio';
+            const iconBg   = isIncome ? 'rgba(24,160,88,.12)' : isSocio ? 'rgba(124,111,90,.12)' : 'rgba(212,58,42,.10)';
+            const iconClr  = isIncome ? 'var(--signal-pos)' : isSocio ? 'var(--socio)' : 'var(--signal-neg)';
+            const amtClr   = isIncome ? 'pos' : isSocio ? 'socio' : 'neg';
             return (
               <div key={t.id} className="v-tx-row" onClick={() => onEdit(t)} style={{ animationDelay: (i * 55) + 'ms' }}>
-                <div className="v-tx-icon" style={{ background: isPos ? 'rgba(24,160,88,.12)' : 'rgba(212,58,42,.10)', color: isPos ? 'var(--signal-pos)' : 'var(--signal-neg)' }}>
-                  {isPos ? '↗' : '↘'}
+                <div className="v-tx-icon" style={{ background: iconBg, color: iconClr }}>
+                  {isIncome ? '↗' : isSocio ? '◌' : '↘'}
                 </div>
                 <div className="v-tx-main">
                   <div className="v-tx-concept" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -186,8 +207,8 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
                 <div className="v-tx-cat" style={{ color: catColor(categoryMeta, t.category) }}>
                   {catLabel(categoryMeta, t.category)}
                 </div>
-                <div className={`v-tx-amount ${isPos ? 'pos' : 'neg'}`}>
-                  {isPos ? '+' : '−'}{fmtCLP(Math.abs(t.amount), { sign: false })}
+                <div className={`v-tx-amount ${amtClr}`}>
+                  {isIncome ? '+' : '−'}{fmtCLP(Math.abs(t.amount), { sign: false })}
                 </div>
               </div>
             );
