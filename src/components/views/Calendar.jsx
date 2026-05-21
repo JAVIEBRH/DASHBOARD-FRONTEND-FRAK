@@ -43,18 +43,22 @@ export function Calendar({ filteredTx, monthsOrder, monthLabels, categoryMeta, o
           </div>
           <div className="v-tx-list">
             {txs.map((t, i) => {
-              const isPos = t.bucket === 'income';
+              const isPos   = t.bucket === 'income';
+              const isSocio = t.bucket === 'retiro_socio';
+              const iconBg  = isPos ? 'rgba(24,160,88,.12)' : isSocio ? 'rgba(124,111,90,.10)' : 'rgba(212,58,42,.10)';
+              const iconClr = isPos ? 'var(--signal-pos)' : isSocio ? 'var(--socio)' : 'var(--signal-neg)';
+              const amtCls  = isPos ? 'pos' : isSocio ? 'socio' : 'neg';
               return (
                 <div key={t.id} className="v-tx-row" onClick={() => onEdit(t)} style={{ animationDelay: (i * 30) + 'ms' }}>
-                  <div className="v-tx-icon" style={{ background: isPos ? 'rgba(24,160,88,.12)' : 'rgba(212,58,42,.10)', color: isPos ? 'var(--signal-pos)' : 'var(--signal-neg)' }}>
-                    {isPos ? '↗' : '↘'}
+                  <div className="v-tx-icon" style={{ background: iconBg, color: iconClr }}>
+                    {isPos ? '↗' : isSocio ? '◌' : '↘'}
                   </div>
                   <div className="v-tx-main">
                     <div className="v-tx-concept">{t.concepto}</div>
                     <div className="v-tx-meta">{fmtDate(t.date)}</div>
                   </div>
                   <div className="v-tx-cat" style={{ color: catColor(categoryMeta, t.category) }}>{catLabel(categoryMeta, t.category)}</div>
-                  <div className={`v-tx-amount ${isPos ? 'pos' : 'neg'}`}>
+                  <div className={`v-tx-amount ${amtCls}`}>
                     {isPos ? '+' : '−'}{fmtCLP(Math.abs(t.amount), { sign: false })}
                   </div>
                 </div>

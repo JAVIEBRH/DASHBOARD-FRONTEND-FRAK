@@ -9,7 +9,7 @@ export function Socio({ filteredTx, categoryMeta, properties, onEdit }) {
   const { total, remesas, anticipos } = useMemo(() => ({
     total:    txs.reduce((s, t) => s + t.amount, 0),
     remesas:  txs.filter(t => /remesa/i.test(t.concepto)).reduce((s, t) => s + t.amount, 0),
-    anticipos: txs.filter(t => /anticipo/i.test(t.concepto)).reduce((s, t) => s + t.amount, 0),
+    anticipos: txs.filter(t => !/remesa/i.test(t.concepto)).reduce((s, t) => s + t.amount, 0),
   }), [txs]);
 
   return (

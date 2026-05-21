@@ -37,7 +37,7 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
   }, [txs, categoryMeta]);
 
   const donutData  = catTab === 'expense' ? byExpCat : byIncCat;
-  const donutTotal = catTab === 'expense' ? Math.abs(expenseOp) : income;
+  const donutTotal = catTab === 'expense' ? byExpCat.reduce((s, c) => s + c.value, 0) : income;
 
   const recent = [...txs].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 6);
 
@@ -80,7 +80,7 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
         <div className="v-kpi-cell">
           <div className="v-kpi-label"><Icon name="arrow_down" size={11} /> Gasto operativo real</div>
           <div className="v-kpi-value neg"><span className="currency">$</span>{cosParts.body}</div>
-          <div className="v-kpi-sub">{fmtCLP(expenseOp)} · sin retiros de socio</div>
+          <div className="v-kpi-sub">{fmtCLP(Math.abs(expenseOp), { sign: false })} · sin retiros de socio</div>
         </div>
       </div>
 

@@ -9,8 +9,8 @@ export function Budget({ transactions }) {
   const by2025 = useMemo(() => {
     return MONTHS_2025.map((m, i) => {
       const txs    = (transactions ?? []).filter(t => t.month === m);
-      const income  = txs.filter(t => t.type === 'pos').reduce((s, t) => s + t.amount, 0);
-      const expense = txs.filter(t => t.type === 'neg').reduce((s, t) => s + Math.abs(t.amount), 0);
+      const income  = txs.filter(t => t.bucket === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = txs.filter(t => t.bucket === 'expense_op').reduce((s, t) => s + Math.abs(t.amount), 0);
       return { month: MONTH_NAMES[i], income, expense, net: income - expense };
     });
   }, [transactions]);
