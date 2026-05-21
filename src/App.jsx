@@ -64,26 +64,27 @@ export default function App() {
   const viewProps = { filteredTx, categoryMeta: data?.categoryMeta, onEdit: handleEdit };
 
   return (
-    <div className="app">
-      <Sidebar view={view} setView={setView} />
-      <div className="main">
+    <div className="vault-app">
+      <Sidebar view={view} setView={setView} year={year} />
+      <main className="v-main">
         <Topbar
           title={VIEW_TITLE[view] ?? view}
           year={year} setYear={setYear}
           period={period} setPeriod={setPeriod}
           monthsOrder={monthsOrder}
+          monthLabels={data?.monthLabels}
           onAdd={handleAdd}
         />
-        <div className="content">
-          {loading && <div className="loading">Cargando datos…</div>}
-          {error && <div className="error-msg">Error al cargar datos. Intenta recargar la página.</div>}
+        <div className="v-content" key={view}>
+          {loading && <div className="v-empty" style={{ padding: '80px 0', textAlign: 'center' }}>Cargando datos…</div>}
+          {error && <div className="v-empty" style={{ padding: '80px 0', textAlign: 'center', color: 'var(--signal-neg)' }}>Error al cargar datos. Intenta recargar la página.</div>}
           {data && !loading && (
             <>
-              {view === 'overview'     && <Overview {...viewProps} transactions={data.transactions} monthsOrder={monthsOrder} period={period} setPeriod={setPeriod} />}
+              {view === 'overview'     && <Overview {...viewProps} transactions={data.transactions} monthsOrder={monthsOrder} monthLabels={data.monthLabels} period={period} setPeriod={setPeriod} />}
               {view === 'ingresos'     && <Ingresos {...viewProps} />}
               {view === 'costos'       && <Costos {...viewProps} />}
               {view === 'transactions' && <Transactions {...viewProps} />}
-              {view === 'calendar'     && <Calendar {...viewProps} monthsOrder={monthsOrder} />}
+              {view === 'calendar'     && <Calendar {...viewProps} monthsOrder={monthsOrder} monthLabels={data.monthLabels} />}
               {view === 'gastos'       && <Gastos {...viewProps} />}
               {view === 'socio'        && <Socio {...viewProps} properties={data.properties} />}
               {view === 'ave_austral'  && <AveAustral {...viewProps} />}
@@ -91,7 +92,7 @@ export default function App() {
             </>
           )}
         </div>
-      </div>
+      </main>
       <Modal
         open={modalOpen}
         tx={editTx}

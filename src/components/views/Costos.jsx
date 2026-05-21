@@ -1,13 +1,12 @@
 // src/components/views/Costos.jsx
 import { useMemo } from 'react';
-import { Card } from '../ui/Card.jsx';
-import { Badge } from '../ui/Badge.jsx';
+import { Icon } from '../ui/Icon.jsx';
 import { BarChart } from '../charts/BarChart.jsx';
-import { formatCLP, formatDate } from '../../utils/formatters.js';
+import { fmtCLP, fmtDate } from '../../utils/formatters.js';
 import { catColor, catLabel } from '../../utils/categories.js';
 
-export function Costos({ filteredTx, categoryMeta, onEdit }) {
-  const txs = filteredTx.filter(t => t.type === 'neg');
+export function Costos({ filteredTx, categoryMeta, onEdit, onAdd }) {
+  const txs  = filteredTx.filter(t => t.type === 'neg');
   const total = txs.reduce((s, t) => s + Math.abs(t.amount), 0);
 
   const byCategory = useMemo(() => {
@@ -19,45 +18,58 @@ export function Costos({ filteredTx, categoryMeta, onEdit }) {
   }, [txs, categoryMeta]);
 
   return (
-    <div className="view">
-      <div className="kpi-grid">
-        <div className="kpi-card" style={{ gridColumn: '1 / -1' }}>
-          <span className="kpi-card__label">Total costos</span>
-          <span className="kpi-card__value" style={{ color: '#EF4444' }}>{formatCLP(total)}</span>
+    <div>
+      <div className="v-section-head">
+        <div>
+          <div className="v-eyebrow">Vista principal</div>
+          <h1 className="v-section-title">Costos <em>del período</em>.</h1>
+          <p className="v-section-sub">Todos los gastos operativos: limpieza, insumos, publicidad, impuestos y más.</p>
+        </div>
+        <button className="v-btn primary" onClick={onAdd}><Icon name="plus" size={14} /> Nueva entrada</button>
+      </div>
+
+      <div className="v-kpi-row">
+        <div className="v-card elev" style={{ gridColumn: '1 / -1' }}>
+          <div className="v-kpi-label">Total costos</div>
+          <div className="v-kpi-value neg"><span className="currency">$</span>{(total / 1_000_000).toFixed(2).replace('.', ',')}M</div>
+          <div className="v-kpi-sub">{txs.length} transacciones · {fmtCLP(total, { sign: false })}</div>
         </div>
       </div>
-      {byCategory.length > 0 && (
-        <Card>
-          <h3 className="section-title">Por categoría</h3>
-          <BarChart bars={byCategory} />
-        </Card>
-      )}
-      <Card>
-        <h3 className="section-title">Movimientos</h3>
-        <TxTable txs={txs} categoryMeta={categoryMeta} onEdit={onEdit} />
-      </Card>
-    </div>
-  );
-}
 
-function TxTable({ txs, categoryMeta, onEdit }) {
-  if (!txs.length) return <p className="empty">Sin movimientos en este período.</p>;
-  return (
-    <table className="tx-table">
-      <thead><tr>
-        <th>Fecha</th><th>Concepto</th><th>Categoría</th><th className="tx-table__num">Monto</th><th />
-      </tr></thead>
-      <tbody>
-        {txs.map(t => (
-          <tr key={t.id} onClick={() => onEdit(t)} className="tx-table__row">
-            <td className="tx-table__date">{formatDate(t.date)}</td>
-            <td>{t.concepto}</td>
-            <td><Badge label={catLabel(categoryMeta, t.category)} color={catColor(categoryMeta, t.category)} /></td>
-            <td className="tx-table__num" style={{ color: '#EF4444' }}>{formatCLP(Math.abs(t.amount))}</td>
-            <td><span className="tx-table__edit">editar</span></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      {byCategory.length > 0 && (
+        <div className="v-card" style={{ marginBottom: 24 }}>
+          <div className="v-chart-head">
+            <div className="v-chart-title">Por categoría</div>
+          </div>
+          <BarChart bars={byCategory} />
+        </div>
+      )}
+
+      <div className="v-card">
+        <div className="v-chart-head">
+          <div>
+            <div className="v-chart-title">Movimientos</div>
+            <div className="v-chart-sub">{txs.length} registros</div>
+          </div>
+        </div>
+        <div className="v-tx-list">
+          {txs.length === 0 && <div className="v-empty">Sin costos en este período.</div>}
+          {txs.map((t, i) => (
+            <div key={t.id} className="v-tx-row" onClick={() => onEdit(t)} style={{ animationDelay: (i * 40) + 'ms' }}>
+              <div className="v-tx-icon" style={{ background: 'rgba(212,58,42,.10)', color: 'var(--signal-neg)' }}>↘</div>
+              <div className="v-tx-main">
+                <div className="v-tx-concept" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  {t.concepto}
+                  {t.id?.startsWith('manual-') && <span className="v-manual-badge">manual</span>}
+                </div>
+                <div className="v-tx-meta">{fmtDate(t.date)}</div>
+              </div>
+              <div className="v-tx-cat" style={{ color: catColor(categoryMeta, t.category) }}>{catLabel(categoryMeta, t.category)}</div>
+              <div className="v-tx-amount neg">−{fmtCLP(Math.abs(t.amount), { sign: false })}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

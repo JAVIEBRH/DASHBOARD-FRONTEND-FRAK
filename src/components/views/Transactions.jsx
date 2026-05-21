@@ -1,52 +1,59 @@
 // src/components/views/Transactions.jsx
 import { useState } from 'react';
-import { Card } from '../ui/Card.jsx';
-import { Badge } from '../ui/Badge.jsx';
 import { Icon } from '../ui/Icon.jsx';
-import { formatCLP, formatDate } from '../../utils/formatters.js';
+import { fmtCLP, fmtDate } from '../../utils/formatters.js';
 import { catColor, catLabel } from '../../utils/categories.js';
 
 export function Transactions({ filteredTx, categoryMeta, onEdit }) {
   const [search, setSearch] = useState('');
 
   const txs = filteredTx.filter(t =>
-    !search || t.concepto?.toLowerCase().includes(search.toLowerCase()) ||
+    !search ||
+    t.concepto?.toLowerCase().includes(search.toLowerCase()) ||
     catLabel(categoryMeta, t.category).toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="view">
-      <Card>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Icon name="rows" size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input className="input" style={{ paddingLeft: 32 }} placeholder="Buscar concepto o categoría…" value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{txs.length} movimientos</span>
+    <div>
+      <div className="v-section-head">
+        <div>
+          <div className="v-eyebrow">General</div>
+          <h1 className="v-section-title">Movimientos <em>registrados</em>.</h1>
         </div>
-        {txs.length === 0 ? (
-          <p className="empty">Sin movimientos.</p>
-        ) : (
-          <table className="tx-table">
-            <thead><tr>
-              <th>Fecha</th><th>Concepto</th><th>Categoría</th><th className="tx-table__num">Monto</th><th />
-            </tr></thead>
-            <tbody>
-              {txs.map(t => (
-                <tr key={t.id} onClick={() => onEdit(t)} className="tx-table__row">
-                  <td className="tx-table__date">{formatDate(t.date)}</td>
-                  <td>{t.concepto}</td>
-                  <td><Badge label={catLabel(categoryMeta, t.category)} color={catColor(categoryMeta, t.category)} /></td>
-                  <td className="tx-table__num" style={{ color: t.amount >= 0 ? '#0EA5E9' : '#EF4444' }}>
-                    {formatCLP(t.amount)}
-                  </td>
-                  <td><span className="tx-table__edit">editar</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+      </div>
+      <div className="v-card">
+        <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Icon name="search" size={14} color="var(--ink-3)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+            <input className="v-input" style={{ paddingLeft: 36 }} placeholder="Buscar concepto o categoría…" value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)' }}>{txs.length} registros</span>
+        </div>
+        <div className="v-tx-list">
+          {txs.length === 0 && <div className="v-empty">Sin movimientos.</div>}
+          {txs.map((t, i) => {
+            const isPos = t.type === 'pos';
+            return (
+              <div key={t.id} className="v-tx-row" onClick={() => onEdit(t)} style={{ animationDelay: Math.min(i * 30, 300) + 'ms' }}>
+                <div className="v-tx-icon" style={{ background: isPos ? 'rgba(24,160,88,.12)' : 'rgba(212,58,42,.10)', color: isPos ? 'var(--signal-pos)' : 'var(--signal-neg)' }}>
+                  {isPos ? '↗' : '↘'}
+                </div>
+                <div className="v-tx-main">
+                  <div className="v-tx-concept" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    {t.concepto}
+                    {t.id?.startsWith('manual-') && <span className="v-manual-badge">manual</span>}
+                  </div>
+                  <div className="v-tx-meta">{fmtDate(t.date)}</div>
+                </div>
+                <div className="v-tx-cat" style={{ color: catColor(categoryMeta, t.category) }}>{catLabel(categoryMeta, t.category)}</div>
+                <div className={`v-tx-amount ${isPos ? 'pos' : 'neg'}`}>
+                  {isPos ? '+' : '−'}{fmtCLP(Math.abs(t.amount), { sign: false })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

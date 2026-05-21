@@ -1,26 +1,30 @@
-// src/components/ui/Icon.jsx
+// src/components/ui/Icon.jsx — 20×20 viewBox, line-art editorial
 const ICONS = {
-  arrow_up:     'M12 19V5M5 12l7-7 7 7',
-  arrow_down:   'M12 5v14M19 12l-7 7-7-7',
-  leaf:         'M17 8C8 10 5.9 16.17 3.82 19.62c0 0 7.27-2.32 10.9-7.24M3 3c0 0 1 4 4 7s7 4 7 4',
-  rows:         'M3 6h18M3 12h18M3 18h18',
-  calendar:     'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
-  chart:        'M3 3v18h18M7 16l4-4 4 4 4-4',
-  sparkle:      'M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z',
-  wallet:       'M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5M16 12h5v4h-5a2 2 0 010-4z',
-  download:     'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3',
-  chevron_right:'M9 18l6-6-6-6',
-  chevron_down: 'M6 9l6 6 6-6',
-  settings:     'M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z',
-  trash:        'M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6',
-  plus:         'M12 5v14M5 12h14',
-  edit:         'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z',
+  home:          'M3 10.5L10 4l7 6.5V17a1 1 0 01-1 1h-3v-5H7v5H4a1 1 0 01-1-1v-6.5z',
+  rows:          'M3 5h14M3 10h14M3 15h14',
+  calendar:      'M4 6h12v10a1 1 0 01-1 1H5a1 1 0 01-1-1V6zM4 6V4.5a.5.5 0 01.5-.5h11a.5.5 0 01.5.5V6M7 3v3M13 3v3',
+  chart:         'M3 16V8m5 8V4m5 12v-6m5 6V11',
+  plus:          'M10 4v12M4 10h12',
+  arrow_down:    'M10 4v12M5 11l5 5 5-5',
+  arrow_up:      'M10 16V4M5 9l5-5 5 5',
+  chevron_right: 'M7 4l6 6-6 6',
+  chevron_down:  'M4 7l6 6 6-6',
+  search:        'M14 14L9 9m1.5-2.5a4 4 0 11-8 0 4 4 0 018 0z',
+  settings:      'M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l.7.7M14.8 14.8l.7.7M4.5 15.5l.7-.7M14.8 5.2l.7-.7M10 7.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z',
+  edit:          'M3 17h4L17 7l-4-4L3 13v4z',
+  trash:         'M5 6h10M8 6V4h4v2M6 6l1 11h6l1-11',
+  sparkle:       'M10 2v4M10 14v4M2 10h4M14 10h4M5 5l2.5 2.5M12.5 12.5L15 15M5 15l2.5-2.5M12.5 7.5L15 5',
+  wallet:        'M3 6a2 2 0 012-2h11v3H5a1 1 0 000 2h11v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6zM13 11h2',
+  leaf:          'M3 17c0-7 4-12 14-13-1 10-6 14-13 14M3 17l8-8',
+  download:      'M10 3v10m-4-4l4 4 4-4M3 16h14',
+  bell:          'M5 9a5 5 0 0110 0v3l1.5 2H3.5L5 12V9zM8 17a2 2 0 004 0',
+  coin:          'M10 18a8 8 0 100-16 8 8 0 000 16zM7 8h5a1.5 1.5 0 010 3H8a1.5 1.5 0 000 3h5',
 };
 
-export function Icon({ name, size = 16, color = 'currentColor', style }) {
+export function Icon({ name, size = 16, color = 'currentColor', strokeWidth = 1.5, style }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none"
+      stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"
       style={{ flexShrink: 0, ...style }}>
       <path d={ICONS[name] ?? ''} />
     </svg>

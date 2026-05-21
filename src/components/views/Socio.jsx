@@ -1,9 +1,6 @@
 // src/components/views/Socio.jsx
 import { useMemo } from 'react';
-import { Card } from '../ui/Card.jsx';
-import { Badge } from '../ui/Badge.jsx';
-import { KpiCard } from '../ui/KpiCard.jsx';
-import { formatCLP, formatDate } from '../../utils/formatters.js';
+import { fmtCLP, fmtDate } from '../../utils/formatters.js';
 import { catColor, catLabel } from '../../utils/categories.js';
 
 const SOCIO_CATS = ['APORTE_SOCIOS', 'RETIROS'];
@@ -16,48 +13,60 @@ export function Socio({ filteredTx, categoryMeta, properties, onEdit }) {
     retiros: txs.filter(t => t.category === 'RETIROS').reduce((s, t) => s + Math.abs(t.amount), 0),
   }), [txs]);
 
-  const byProperty = useMemo(() => {
-    const map = {};
-    txs.forEach(t => {
-      const k = t.property || 'general';
-      if (!map[k]) map[k] = [];
-      map[k].push(t);
-    });
-    return map;
-  }, [txs]);
+  const net = aportes - retiros;
 
   return (
-    <div className="view">
-      <div className="kpi-grid">
-        <KpiCard label="Aportes de socios" value={aportes} icon="arrow_up" accent="#A855F7" />
-        <KpiCard label="Retiros" value={retiros} icon="arrow_down" accent="#7C3AED" />
-        <KpiCard label="Neto socio" value={aportes - retiros} icon="wallet" accent={aportes - retiros >= 0 ? '#10B981' : '#EF4444'} />
+    <div>
+      <div className="v-section-head">
+        <div>
+          <div className="v-eyebrow">Socio</div>
+          <h1 className="v-section-title">Movimientos <em>de socio</em>.</h1>
+          <p className="v-section-sub">Aportes de socios y retiros registrados en el período. Estos van separados del gasto operativo.</p>
+        </div>
       </div>
-      {Object.entries(byProperty).map(([propId, propTxs]) => {
-        const meta = properties?.[propId] ?? { name: propId, color: '#94A3B8' };
-        return (
-          <Card key={propId}>
-            <h3 className="section-title" style={{ color: meta.color }}>{meta.name}</h3>
-            <table className="tx-table">
-              <thead><tr>
-                <th>Fecha</th><th>Concepto</th><th>Categoría</th><th className="tx-table__num">Monto</th><th />
-              </tr></thead>
-              <tbody>
-                {propTxs.map(t => (
-                  <tr key={t.id} onClick={() => onEdit(t)} className="tx-table__row">
-                    <td className="tx-table__date">{formatDate(t.date)}</td>
-                    <td>{t.concepto}</td>
-                    <td><Badge label={catLabel(categoryMeta, t.category)} color={catColor(categoryMeta, t.category)} /></td>
-                    <td className="tx-table__num" style={{ color: t.amount >= 0 ? '#0EA5E9' : '#EF4444' }}>{formatCLP(t.amount)}</td>
-                    <td><span className="tx-table__edit">editar</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        );
-      })}
-      {txs.length === 0 && <p className="empty">Sin movimientos de socio en este período.</p>}
+
+      <div className="v-kpi-hero">
+        <div className="v-kpi-cell primary">
+          <div className="v-kpi-label">Neto socio</div>
+          <div className="v-kpi-value"><span className="currency">$</span>{((Math.abs(net)) / 1_000_000).toFixed(2).replace('.', ',')}M</div>
+          <div className="v-kpi-sub">{net >= 0 ? 'Saldo positivo' : 'Saldo negativo'}</div>
+        </div>
+        <div className="v-kpi-cell">
+          <div className="v-kpi-label">Aportes</div>
+          <div className="v-kpi-value pos"><span className="currency">$</span>{(aportes / 1_000_000).toFixed(2).replace('.', ',')}M</div>
+          <div className="v-kpi-sub">{fmtCLP(aportes, { sign: false })}</div>
+        </div>
+        <div className="v-kpi-cell">
+          <div className="v-kpi-label">Retiros</div>
+          <div className="v-kpi-value socio"><span className="currency">$</span>{(retiros / 1_000_000).toFixed(2).replace('.', ',')}M</div>
+          <div className="v-kpi-sub">{fmtCLP(retiros, { sign: false })}</div>
+        </div>
+      </div>
+
+      <div className="v-card">
+        <div className="v-chart-head">
+          <div className="v-chart-title">Movimientos de socio</div>
+          <div className="v-chart-sub">{txs.length} registros</div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 110px', gap: 10, padding: '8px 20px', borderBottom: '1px solid var(--line)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--ink-3)' }}>Fecha</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--ink-3)' }}>Concepto</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--ink-3)', textAlign: 'right' }}>Monto</span>
+        </div>
+        {txs.length === 0 && <div className="v-empty">Sin movimientos de socio en este período.</div>}
+        {txs.map(t => {
+          const isAporte = t.category === 'APORTE_SOCIOS';
+          return (
+            <div key={t.id} className="v-socio-row" onClick={() => onEdit(t)}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, color: 'var(--ink-3)' }}>{fmtDate(t.date)}</span>
+              <span style={{ fontSize: 13.5, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.concepto}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13.5, fontWeight: 600, textAlign: 'right', color: isAporte ? 'var(--signal-pos)' : 'var(--socio)' }}>
+                {isAporte ? '+' : '−'}{fmtCLP(Math.abs(t.amount), { sign: false })}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
