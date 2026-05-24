@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Guía de bienvenida · Casa PAC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --brand: #1a2332;
+    --brand-light: #2e3f57;
+    --accent: #c8a96e;
+    --accent-soft: #f5eedd;
+    --bg: #fafaf8;
+    --card: #ffffff;
+    --green: #22c55e;
+    --green-soft: #dcfce7;
+    --ink: #111827;
+    --ink-2: #4b5563;
+    --ink-3: #9ca3af;
+    --border: #e5e7eb;
+    --radius: 16px;
+    --font: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--brand);
+    padding: 28px 24px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(200,169,110,.12);
+  }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .brand-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--brand);
+    flex-shrink: 0;
+  }
+  .brand-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,.7);
+    letter-spacing: .04em;
+  }
+  .header-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,.55);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot-sep { color: rgba(255,255,255,.25); }
+
+  /* QUICK TILES */
+  .quick-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 16px 16px 4px;
+  }
+  .tile {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tile-icon { font-size: 20px; margin-bottom: 2px; }
+  .tile-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-3);
+  }
+  .tile-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .tile-sub { font-size: 11px; color: var(--ink-3); }
+
+  .wifi-tile {
+    grid-column: 1 / -1;
+    background: var(--brand);
+    border-color: var(--brand);
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+  .wifi-tile .tile-label { color: rgba(255,255,255,.5); }
+  .wifi-tile .tile-value { color: white; font-size: 1.1rem; letter-spacing: .04em; }
+  .wifi-tile .tile-sub { color: rgba(255,255,255,.4); }
+  .wifi-tile .tile-icon { font-size: 24px; }
+
+  /* SECCIONES */
+  .section { padding: 20px 16px 0; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  /* ITEM LIST */
+  .item-list { display: flex; flex-direction: column; }
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: background .12s;
+  }
+  .item:last-child { border-bottom: none; }
+  .item:active, a.item:active { background: var(--bg); }
+  .item-emoji {
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .item-body { flex: 1; min-width: 0; }
+  .item-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .item-desc { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; margin-top: 2px; }
+  .item-arrow { color: var(--ink-3); font-size: 16px; align-self: center; flex-shrink: 0; }
+
+  /* ALERT CARD */
+  .alert-card {
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border: 1px solid;
+  }
+  .alert-card.green { background: var(--green-soft); border-color: #bbf7d0; }
+  .alert-card.amber { background: #fef3c7; border-color: #fde68a; }
+  .alert-card .alert-emoji { font-size: 20px; flex-shrink: 0; }
+  .alert-card .alert-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
+  .alert-card .alert-text strong { color: var(--ink); }
+
+  /* LUGAR CARD */
+  .lugar-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .lugar-emoji { font-size: 22px; flex-shrink: 0; }
+  .lugar-body { flex: 1; }
+  .lugar-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .lugar-detail { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .lugar-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 99px;
+    background: var(--green-soft);
+    color: #15803d;
+    white-space: nowrap;
+  }
+
+  /* REGLAS CARD */
+  .rule-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-emoji { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+
+  /* CTA CONTACT */
+  .cta-contact {
+    margin: 20px 16px 0;
+    background: var(--brand);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+  }
+  .cta-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.1);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .cta-body { flex: 1; }
+  .cta-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; }
+  .cta-value { font-size: 16px; font-weight: 700; color: white; }
+  .cta-sub { font-size: 12px; color: rgba(255,255,255,.45); margin-top: 2px; }
+
+  /* FOOTER */
+  .footer {
+    padding: 24px 16px 0;
+    text-align: center;
+  }
+  .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .footer-mark {
+    width: 24px; height: 24px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--brand);
+  }
+  .footer-name { font-size: 12px; font-weight: 700; color: var(--ink-3); }
+  .footer-tagline { font-size: 11px; color: var(--ink-3); }
+
+  /* COMING SOON */
+  .coming-soon {
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .coming-soon-icon { font-size: 28px; margin-bottom: 8px; }
+  .coming-soon-label { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand-row">
+    <div class="brand-mark">SA</div>
+    <div class="brand-name">Send Austral</div>
+  </div>
+  <h1 class="header-title">Bienvenido a la Casa PAC</h1>
+  <div class="header-sub">
+    <span>Pedro Aguirre Cerda</span>
+    <span class="dot-sep">·</span>
+    <span>Santiago, Chile</span>
+    <span class="dot-sep">·</span>
+    <span>★ 4.94</span>
+  </div>
+</div>
+
+<!-- QUICK INFO -->
+<div class="quick-tiles">
+  <div class="tile wifi-tile">
+    <div class="tile-icon">📶</div>
+    <div>
+      <div class="tile-label">WiFi</div>
+      <div class="tile-value">CasaPAC_Wifi</div>
+      <div class="tile-sub">Contraseña: Diego te la dará al llegar</div>
+    </div>
+  </div>
+  <div class="tile">
+    <div class="tile-icon">🔑</div>
+    <div class="tile-label">Check-in</div>
+    <div class="tile-value">Desde 15:00</div>
+    <div class="tile-sub">Teclado numérico</div>
+  </div>
+  <div class="tile">
+    <div class="tile-icon">🕙</div>
+    <div class="tile-label">Check-out</div>
+    <div class="tile-value">Hasta 11:00</div>
+    <div class="tile-sub">Dejar llave en la puerta</div>
+  </div>
+  <div class="tile">
+    <div class="tile-icon">👥</div>
+    <div class="tile-label">Capacidad</div>
+    <div class="tile-value">7 huéspedes</div>
+    <div class="tile-sub">3 hab · 4 camas · 1 baño</div>
+  </div>
+  <div class="tile">
+    <div class="tile-icon">🚗</div>
+    <div class="tile-label">Estacionamiento</div>
+    <div class="tile-value">Incluido</div>
+    <div class="tile-sub">Compartido con Diego</div>
+  </div>
+</div>
+
+<!-- ALERTA COMPARTIDO -->
+<div class="section">
+  <div class="alert-card amber">
+    <span class="alert-emoji">ℹ️</span>
+    <span class="alert-text"><strong>Espacio compartido:</strong> La lavandería y el estacionamiento son compartidos con Diego, quien vive en una casa independiente dentro del mismo terreno.</span>
+  </div>
+</div>
+
+<!-- LA CASA -->
+<div class="section">
+  <div class="section-title">La casa</div>
+  <div class="card">
+    <div class="item-list">
+      <div class="item">
+        <div class="item-emoji">🔥</div>
+        <div class="item-body">
+          <div class="item-label">Parrilla disponible</div>
+          <div class="item-desc">Disponible en el patio. Consulta a Diego por el carbón. Ideal para un asado con la familia.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-emoji">🏓</div>
+        <div class="item-body">
+          <div class="item-label">Mesa de ping pong</div>
+          <div class="item-desc">Disponible en el patio exterior. Paletas en la casa.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-emoji">🍳</div>
+        <div class="item-body">
+          <div class="item-label">Cocina completamente equipada</div>
+          <div class="item-desc">Ollas, sartenes, utensilios, microondas. Todo disponible para cocinar.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-emoji">👕</div>
+        <div class="item-body">
+          <div class="item-label">Lavadora</div>
+          <div class="item-desc">Compartida con el propietario. Coordina horario con Diego si la necesitas.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-emoji">💻</div>
+        <div class="item-body">
+          <div class="item-label">Zona de trabajo</div>
+          <div class="item-desc">Escritorio y silla disponibles. WiFi de buena velocidad para videollamadas.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-emoji">📷</div>
+        <div class="item-body">
+          <div class="item-label">Seguridad</div>
+          <div class="item-desc">Cámaras de seguridad en el exterior de la propiedad.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGLAS -->
+<div class="section">
+  <div class="section-title">Reglas de la casa</div>
+  <div class="card">
+    <div class="item-list">
+      <div class="rule-item"><span class="rule-emoji">🚭</span> No fumar dentro de la propiedad</div>
+      <div class="rule-item"><span class="rule-emoji">🐾</span> No se admiten mascotas sin autorización previa</div>
+      <div class="rule-item"><span class="rule-emoji">🎉</span> No se permiten fiestas ni eventos no coordinados</div>
+      <div class="rule-item"><span class="rule-emoji">🔇</span> Respetar el silencio nocturno después de las 23:00</div>
+      <div class="rule-item"><span class="rule-emoji">👥</span> Máximo 7 huéspedes en la propiedad</div>
+      <div class="rule-item"><span class="rule-emoji">🔒</span> Cerrar con llave al salir</div>
+    </div>
+  </div>
+</div>
+
+<!-- EL BARRIO -->
+<div class="section">
+  <div class="section-title">El barrio — Lo esencial</div>
+
+  <div class="lugar-card">
+    <div class="lugar-emoji">🛒</div>
+    <div class="lugar-body">
+      <div class="lugar-name">Supermercado</div>
+      <div class="lugar-detail">A pocos minutos a pie · Ej: Líder / Unimarc</div>
+    </div>
+    <div class="lugar-badge">Por confirmar</div>
+  </div>
+  <div class="lugar-card">
+    <div class="lugar-emoji">💊</div>
+    <div class="lugar-body">
+      <div class="lugar-name">Farmacia</div>
+      <div class="lugar-detail">Cruz Verde / Salcobrand cercana</div>
+    </div>
+    <div class="lugar-badge">Por confirmar</div>
+  </div>
+  <div class="lugar-card">
+    <div class="lugar-emoji">🚇</div>
+    <div class="lugar-body">
+      <div class="lugar-name">Metro más cercano</div>
+      <div class="lugar-detail">Acceso a Red Metropolitana</div>
+    </div>
+    <div class="lugar-badge">Por confirmar</div>
+  </div>
+
+  <div class="alert-card green">
+    <span class="alert-emoji">📍</span>
+    <span class="alert-text"><strong>Solo 15 minutos al centro de Santiago</strong> en auto o con transporte público. Excelente conectividad a autopistas y troncales.</span>
+  </div>
+</div>
+
+<!-- ACTIVIDADES CERCANAS -->
+<div class="section">
+  <div class="section-title">Actividades cercanas</div>
+  <div class="lugar-card">
+    <div class="lugar-emoji">⚽</div>
+    <div class="lugar-body">
+      <div class="lugar-name">Estadio Nacional</div>
+      <div class="lugar-detail">8 minutos en auto · Partidos, shows y eventos</div>
+    </div>
+  </div>
+  <div class="lugar-card">
+    <div class="lugar-emoji">🌳</div>
+    <div class="lugar-body">
+      <div class="lugar-name">Parques y plazas</div>
+      <div class="lugar-detail">Áreas verdes para familias con niños</div>
+    </div>
+    <div class="lugar-badge">Por confirmar</div>
+  </div>
+  <div class="lugar-card">
+    <div class="lugar-emoji">🥩</div>
+    <div class="lugar-body">
+      <div class="lugar-name">Restaurantes recomendados</div>
+      <div class="lugar-detail">Diego te recomienda sus favoritos del barrio</div>
+    </div>
+    <div class="lugar-badge">Por confirmar</div>
+  </div>
+</div>
+
+<!-- CÓMO LLEGAR -->
+<div class="section">
+  <div class="section-title">Cómo llegar al centro</div>
+  <div class="card">
+    <div class="item-list">
+      <div class="item">
+        <div class="item-emoji">🚗</div>
+        <div class="item-body">
+          <div class="item-label">En auto</div>
+          <div class="item-desc">15 minutos al centro. Acceso directo a autopistas principales.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-emoji">🚌</div>
+        <div class="item-body">
+          <div class="item-label">En transporte público</div>
+          <div class="item-desc">Red de buses Red Metropolitana con acceso cercano. Coordinar Bip! Card.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="item-emoji">📱</div>
+        <div class="item-body">
+          <div class="item-label">Uber / inDrive</div>
+          <div class="item-desc">Disponible las 24 horas. Tarifa al centro aprox. $3.000–$6.000 CLP según horario.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACTO -->
+<a class="cta-contact" href="https://wa.me/56912345678" target="_blank">
+  <div class="cta-icon">💬</div>
+  <div class="cta-body">
+    <div class="cta-label">¿Necesitas ayuda?</div>
+    <div class="cta-value">Escríbele a Diego</div>
+    <div class="cta-sub">Responde en menos de 1 hora · WhatsApp</div>
+  </div>
+  <div style="color:rgba(255,255,255,.4);font-size:18px;">›</div>
+</a>
+
+<!-- VER LISTING -->
+<div style="padding:12px 16px 0;">
+  <a href="https://www.airbnb.cl/rooms/1266096086654662110" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:white;border:1px solid var(--border);border-radius:var(--radius);text-decoration:none;color:var(--ink-2);font-size:13px;font-weight:600;">
+    <span>★ Ver publicación en Airbnb</span>
+    <span style="color:var(--ink-3);">→</span>
+  </a>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-brand">
+    <div class="footer-mark">SA</div>
+    <div class="footer-name">Send Austral</div>
+  </div>
+  <div class="footer-tagline">Gestión profesional de propiedades · Santiago, Chile</div>
+</div>
+
+</body>
+</html>
