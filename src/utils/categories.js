@@ -13,6 +13,9 @@ export const NAV_GROUPS = [
   { label: 'Negocios', items: [
     { id: 'ave_austral', label: 'Ave Austral', icon: 'sparkle' },
   ]},
+  { label: 'Operaciones', items: [
+    { id: 'stock', label: 'Stock', icon: 'box' },
+  ]},
   { label: 'Socio', items: [
     { id: 'socio', label: 'Mov. de socio', icon: 'wallet' },
   ]},

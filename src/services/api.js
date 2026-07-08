@@ -27,6 +27,40 @@ export const api = {
   deleteTx: (id) =>
     fetch(`${BASE}/api/transactions/${id}`, { method: 'DELETE' }).then(json),
 
+  createStock: (data) =>
+    fetch(`${BASE}/api/stock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  updateStock: (id, data) =>
+    fetch(`${BASE}/api/stock/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  deleteStock: (id) =>
+    fetch(`${BASE}/api/stock/${id}`, { method: 'DELETE' }).then(json),
+
+  createFurniture: (data) =>
+    fetch(`${BASE}/api/furniture`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  updateFurniture: (id, data) =>
+    fetch(`${BASE}/api/furniture/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  deleteFurniture: (id) =>
+    fetch(`${BASE}/api/furniture/${id}`, { method: 'DELETE' }).then(json),
+
   exportUrl: (params) =>
     `${BASE}/api/export/excel?${new URLSearchParams(params)}`,
 };

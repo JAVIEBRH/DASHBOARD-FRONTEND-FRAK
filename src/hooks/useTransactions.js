@@ -42,5 +42,5 @@ export function useTransactions() {
     await api.deleteTx(id);
   };
 
-  return { data, loading, error, addTransaction, editTransaction, deleteTransaction };
+  return { data, setData, loading, error, addTransaction, editTransaction, deleteTransaction };
 }

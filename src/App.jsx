@@ -1,8 +1,10 @@
 // src/App.jsx
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTransactions } from './hooks/useTransactions.js';
 import { useFilter } from './hooks/useFilter.js';
 import { useToast } from './hooks/useToast.js';
+import { useStock } from './hooks/useStock.js';
+import { useFurniture } from './hooks/useFurniture.js';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { Topbar } from './components/layout/Topbar.jsx';
 import { ToastContainer } from './components/ui/Toast.jsx';
@@ -16,6 +18,8 @@ import { Gastos } from './components/views/Gastos.jsx';
 import { Socio } from './components/views/Socio.jsx';
 import { AveAustral } from './components/views/AveAustral.jsx';
 import { Budget } from './components/views/Budget.jsx';
+import { Stock } from './components/views/Stock.jsx';
+import { isLowStockConsumible } from './utils/stock.js';
 
 const VIEW_TITLE = {
   overview: 'Resumen',
@@ -27,6 +31,7 @@ const VIEW_TITLE = {
   socio: 'Mov. de socio',
   ave_austral: 'Ave Austral',
   budget: 'Presupuesto 2026',
+  stock: 'Stock',
 };
 
 export default function App() {
@@ -34,11 +39,22 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editTx, setEditTx] = useState(null);
 
-  const { data, loading, error, addTransaction, editTransaction, deleteTransaction } = useTransactions();
+  const { data, setData, loading, error, addTransaction, editTransaction, deleteTransaction } = useTransactions();
   const { year, setYear, period, setPeriod, filteredTx, monthsOrder } = useFilter(
     data?.transactions, data?.monthsOrder2025, data?.monthsOrder2026
   );
   const { toasts, showToast } = useToast();
+  const { addStockItem, editStockItem, deleteStockItem } = useStock(data, setData);
+  const { addFurnitureItem, editFurnitureItem, deleteFurnitureItem } = useFurniture(data, setData);
+
+  const toastedLowStockRef = useRef(false);
+  useEffect(() => {
+    if (!loading && data && !toastedLowStockRef.current) {
+      toastedLowStockRef.current = true;
+      const n = data.stock.filter(isLowStockConsumible).length;
+      if (n > 0) showToast(`Tienes ${n} producto${n === 1 ? '' : 's'} con stock bajo`, 'error');
+    }
+  }, [loading, data]);
 
   const handleAdd = () => { setEditTx(null); setModalOpen(true); };
   const handleEdit = (tx) => { setEditTx(tx); setModalOpen(true); };
@@ -62,10 +78,11 @@ export default function App() {
   };
 
   const viewProps = { filteredTx, categoryMeta: data?.categoryMeta, onEdit: handleEdit };
+  const stockAlertCount = data ? data.stock.filter(isLowStockConsumible).length : 0;
 
   return (
     <div className="vault-app">
-      <Sidebar view={view} setView={setView} year={year} />
+      <Sidebar view={view} setView={setView} year={year} badgeCounts={{ stock: stockAlertCount }} />
       <main className="v-main">
         <Topbar
           title={VIEW_TITLE[view] ?? view}
@@ -89,6 +106,14 @@ export default function App() {
               {view === 'socio'        && <Socio {...viewProps} properties={data.properties} />}
               {view === 'ave_austral'  && <AveAustral {...viewProps} />}
               {view === 'budget'       && <Budget transactions={data.transactions} categoryMeta={data.categoryMeta} />}
+              {view === 'stock'        && (
+                <Stock
+                  stock={data.stock} furniture={data.furniture}
+                  addStockItem={addStockItem} editStockItem={editStockItem} deleteStockItem={deleteStockItem}
+                  addFurnitureItem={addFurnitureItem} editFurnitureItem={editFurnitureItem} deleteFurnitureItem={deleteFurnitureItem}
+                  showToast={showToast}
+                />
+              )}
             </>
           )}
         </div>

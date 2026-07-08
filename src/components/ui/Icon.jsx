@@ -19,6 +19,7 @@ const ICONS = {
   download:      'M10 3v10m-4-4l4 4 4-4M3 16h14',
   bell:          'M5 9a5 5 0 0110 0v3l1.5 2H3.5L5 12V9zM8 17a2 2 0 004 0',
   coin:          'M10 18a8 8 0 100-16 8 8 0 000 16zM7 8h5a1.5 1.5 0 010 3H8a1.5 1.5 0 000 3h5',
+  box:           'M3 6l7-3 7 3-7 3-7-3zM3 6v8l7 3 7-3V6M10 9v8',
 };
 
 export function Icon({ name, size = 16, color = 'currentColor', strokeWidth = 1.5, style }) {
