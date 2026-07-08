@@ -50,6 +50,7 @@ export function Stock({
           isStockZone={isStockZone}
           items={items}
           onBack={() => setZone(null)}
+          onSelectZone={setZone}
           onAdd={handleAdd}
           onEdit={handleEdit}
         />
