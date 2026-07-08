@@ -1,7 +1,7 @@
 // src/components/views/ZoneDetail.jsx
 import { useState } from 'react';
 import { Icon } from '../ui/Icon.jsx';
-import { ZONES, zoneLabel, stockStatus, STATUS_META } from '../../utils/stock.js';
+import { ZONES, zoneLabel, stockStatus, statusMeta } from '../../utils/stock.js';
 
 export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onAdd, onEdit }) {
   const [search, setSearch]                 = useState('');
@@ -59,9 +59,9 @@ export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onA
           </select>
           <select className="v-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="">Estado</option>
-            <option value="ok">En stock</option>
-            <option value="bajo">Bajo stock</option>
-            <option value="agotado">Agotado</option>
+            <option value="ok">{isStockZone ? 'En stock' : 'Presente'}</option>
+            {isStockZone && <option value="bajo">Bajo stock</option>}
+            <option value="agotado">{isStockZone ? 'Agotado' : 'Faltante'}</option>
           </select>
         </div>
 
@@ -78,7 +78,7 @@ export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onA
             </div>
             {filtered.map((item, i) => {
               const status = stockStatus(item, isStockZone);
-              const meta = STATUS_META[status];
+              const meta = statusMeta(status, isStockZone);
               const qty = isStockZone ? item.qtyBodega : item.qty;
               return (
                 <div key={item.id} className="v-stock-row" style={{ animationDelay: Math.min(i * 25, 250) + 'ms' }}>
@@ -90,7 +90,7 @@ export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onA
                   </div>
                   <div className="v-stock-cat">{item.category}</div>
                   <div className="v-stock-qty">
-                    {qty}<span className="thresh">mín. {item.umbralUnidades}</span>
+                    {qty}{isStockZone && <span className="thresh">mín. {item.umbralUnidades}</span>}
                   </div>
                   <div className="v-stock-status" style={{ color: meta.color }}>
                     <i className="dot" style={{ background: meta.color }} />

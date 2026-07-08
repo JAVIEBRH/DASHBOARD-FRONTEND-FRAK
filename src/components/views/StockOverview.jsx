@@ -1,12 +1,13 @@
 // src/components/views/StockOverview.jsx
-import { ZONES, zoneStats, STATUS_META } from '../../utils/stock.js';
+import { ZONES, zoneStats, statusMeta } from '../../utils/stock.js';
 
 export function StockOverview({ stock, furniture, onSelectZone }) {
   const totalProductos = stock.length + furniture.length;
+  // "Por agotar" y "Agotados" son métricas de alerta — solo tiene sentido medirlas sobre
+  // consumibles (un mueble faltante no es una alerta de reposición, es un dato de inventario).
   const stockStats = zoneStats(stock, true);
-  const furnitureStats = zoneStats(furniture, false);
-  const porAgotar = stockStats.bajoStock + furnitureStats.bajoStock;
-  const agotados = stockStats.agotados + furnitureStats.agotados;
+  const porAgotar = stockStats.bajoStock;
+  const agotados = stockStats.agotados;
 
   return (
     <div>
@@ -27,21 +28,23 @@ export function StockOverview({ stock, furniture, onSelectZone }) {
         <div className="v-kpi-cell">
           <div className="v-kpi-label">Por agotar</div>
           <div className="v-kpi-value" style={{ color: 'var(--jat)' }}>{porAgotar}</div>
-          <div className="v-kpi-sub">Bajo el umbral de alerta</div>
+          <div className="v-kpi-sub">Consumibles bajo el umbral de alerta</div>
         </div>
         <div className="v-kpi-cell">
           <div className="v-kpi-label">Agotados</div>
           <div className="v-kpi-value neg">{agotados}</div>
-          <div className="v-kpi-sub">Sin unidades disponibles</div>
+          <div className="v-kpi-sub">Consumibles sin unidades disponibles</div>
         </div>
       </div>
 
       <div className="v-zone-grid">
         {ZONES.map(z => {
-          const zoneItems = z.id === 'stock' ? stock : furniture.filter(f => f.zone === z.id);
-          const stats = zoneStats(zoneItems, z.id === 'stock');
+          const isStockZone = z.id === 'stock';
+          const zoneItems = isStockZone ? stock : furniture.filter(f => f.zone === z.id);
+          const stats = zoneStats(zoneItems, isStockZone);
           const ok = stats.total - stats.bajoStock - stats.agotados;
           const pct = (n) => stats.total === 0 ? 0 : (n / stats.total) * 100;
+          const criticalLabel = isStockZone ? 'agotado' : 'faltante';
 
           return (
             <button key={z.id} className="v-card v-zone-card" onClick={() => onSelectZone(z.id)}>
@@ -51,14 +54,14 @@ export function StockOverview({ stock, furniture, onSelectZone }) {
               {stats.total > 0 ? (
                 <>
                   <div className="v-zone-bar">
-                    {ok > 0 && <span style={{ width: pct(ok) + '%', background: STATUS_META.ok.color }} />}
-                    {stats.bajoStock > 0 && <span style={{ width: pct(stats.bajoStock) + '%', background: STATUS_META.bajo.color }} />}
-                    {stats.agotados > 0 && <span style={{ width: pct(stats.agotados) + '%', background: STATUS_META.agotado.color }} />}
+                    {ok > 0 && <span style={{ width: pct(ok) + '%', background: statusMeta('ok', isStockZone).color }} />}
+                    {stats.bajoStock > 0 && <span style={{ width: pct(stats.bajoStock) + '%', background: 'var(--jat)' }} />}
+                    {stats.agotados > 0 && <span style={{ width: pct(stats.agotados) + '%', background: statusMeta('agotado', isStockZone).color }} />}
                   </div>
                   <div className="v-zone-legend">
-                    {stats.agotados > 0 && <span><i className="dot" style={{ background: STATUS_META.agotado.color }} />{stats.agotados} agotado{stats.agotados === 1 ? '' : 's'}</span>}
-                    {stats.bajoStock > 0 && <span><i className="dot" style={{ background: STATUS_META.bajo.color }} />{stats.bajoStock} bajo{stats.bajoStock === 1 ? '' : 's'}</span>}
-                    {stats.agotados === 0 && stats.bajoStock === 0 && <span><i className="dot" style={{ background: STATUS_META.ok.color }} />Todo en orden</span>}
+                    {stats.agotados > 0 && <span><i className="dot" style={{ background: statusMeta('agotado', isStockZone).color }} />{stats.agotados} {criticalLabel}{stats.agotados === 1 ? '' : 's'}</span>}
+                    {stats.bajoStock > 0 && <span><i className="dot" style={{ background: 'var(--jat)' }} />{stats.bajoStock} bajo{stats.bajoStock === 1 ? '' : 's'}</span>}
+                    {stats.agotados === 0 && stats.bajoStock === 0 && <span><i className="dot" style={{ background: statusMeta('ok', isStockZone).color }} />Todo en orden</span>}
                   </div>
                 </>
               ) : (

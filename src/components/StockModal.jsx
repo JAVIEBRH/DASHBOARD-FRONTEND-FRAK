@@ -5,16 +5,18 @@ import { zoneLabel } from '../utils/stock.js';
 
 const EMPTY = { category: '', name: '', qty: '', unit: '', pctEnUso: '', umbral: '1' };
 
-function validate(f) {
+function validate(f, isStockZone) {
   const e = {};
   if (!f.name.trim())     e.name = 'El nombre es requerido';
   if (!f.category.trim()) e.category = 'La categoría es requerida';
   if (f.qty === '')                                    e.qty = 'La cantidad es requerida';
   else if (isNaN(Number(f.qty)) || Number(f.qty) < 0)  e.qty = 'Ingresa un número válido';
-  if (f.umbral === '')                                     e.umbral = 'El umbral es requerido';
-  else if (isNaN(Number(f.umbral)) || Number(f.umbral) < 0) e.umbral = 'Ingresa un número válido';
-  if (f.pctEnUso !== '' && (isNaN(Number(f.pctEnUso)) || Number(f.pctEnUso) < 0 || Number(f.pctEnUso) > 100))
-    e.pctEnUso = 'Ingresa un valor entre 0 y 100';
+  if (isStockZone) {
+    if (f.umbral === '')                                     e.umbral = 'El umbral es requerido';
+    else if (isNaN(Number(f.umbral)) || Number(f.umbral) < 0) e.umbral = 'Ingresa un número válido';
+    if (f.pctEnUso !== '' && (isNaN(Number(f.pctEnUso)) || Number(f.pctEnUso) < 0 || Number(f.pctEnUso) > 100))
+      e.pctEnUso = 'Ingresa un valor entre 0 y 100';
+  }
   return e;
 }
 
@@ -50,15 +52,14 @@ export function StockModal({ open, item, isStockZone, zone, onSave, onDelete, on
   };
 
   const handleSubmit = () => {
-    const e = validate(form);
+    const e = validate(form, isStockZone);
     if (Object.keys(e).length) { setErrors(e); return; }
     const base = {
       category: form.category.trim(),
       name: form.name.trim(),
-      umbralUnidades: Number(form.umbral),
     };
     const payload = isStockZone
-      ? { ...base, property: 'pac', unit: form.unit.trim(), qtyBodega: Number(form.qty), pctEnUso: form.pctEnUso === '' ? null : Number(form.pctEnUso) }
+      ? { ...base, property: 'pac', unit: form.unit.trim(), qtyBodega: Number(form.qty), pctEnUso: form.pctEnUso === '' ? null : Number(form.pctEnUso), umbralUnidades: Number(form.umbral) }
       : { ...base, qty: Number(form.qty) };
     onSave(payload);
   };
@@ -96,22 +97,32 @@ export function StockModal({ open, item, isStockZone, zone, onSave, onDelete, on
           {errors.category && <div className="v-form-error">{errors.category}</div>}
         </div>
 
-        <div className="v-form-row-split">
+        {isStockZone ? (
+          <div className="v-form-row-split">
+            <div className="v-form-row">
+              <div className="v-form-label">Cantidad en bodega</div>
+              <input className={'v-input' + (errors.qty ? ' v-input-error' : '')}
+                type="number" min="0" value={form.qty} onChange={e => set('qty', e.target.value)}
+                style={{ fontFamily: 'var(--font-mono)', textAlign: 'right' }} />
+              {errors.qty && <div className="v-form-error">{errors.qty}</div>}
+            </div>
+            <div className="v-form-row">
+              <div className="v-form-label">Umbral de alerta</div>
+              <input className={'v-input' + (errors.umbral ? ' v-input-error' : '')}
+                type="number" min="0" value={form.umbral} onChange={e => set('umbral', e.target.value)}
+                style={{ fontFamily: 'var(--font-mono)', textAlign: 'right' }} />
+              {errors.umbral && <div className="v-form-error">{errors.umbral}</div>}
+            </div>
+          </div>
+        ) : (
           <div className="v-form-row">
-            <div className="v-form-label">{isStockZone ? 'Cantidad en bodega' : 'Cantidad'}</div>
+            <div className="v-form-label">Cantidad</div>
             <input className={'v-input' + (errors.qty ? ' v-input-error' : '')}
               type="number" min="0" value={form.qty} onChange={e => set('qty', e.target.value)}
-              style={{ fontFamily: 'var(--font-mono)', textAlign: 'right' }} />
+              style={{ fontFamily: 'var(--font-mono)', textAlign: 'right', maxWidth: 160 }} />
             {errors.qty && <div className="v-form-error">{errors.qty}</div>}
           </div>
-          <div className="v-form-row">
-            <div className="v-form-label">Umbral de alerta</div>
-            <input className={'v-input' + (errors.umbral ? ' v-input-error' : '')}
-              type="number" min="0" value={form.umbral} onChange={e => set('umbral', e.target.value)}
-              style={{ fontFamily: 'var(--font-mono)', textAlign: 'right' }} />
-            {errors.umbral && <div className="v-form-error">{errors.umbral}</div>}
-          </div>
-        </div>
+        )}
 
         {isStockZone && (
           <div className="v-form-row-split">
