@@ -1,9 +1,9 @@
 // src/components/views/ZoneDetail.jsx
 import { useState } from 'react';
 import { Icon } from '../ui/Icon.jsx';
-import { ZONES, zoneLabel, stockStatus, statusMeta } from '../../utils/stock.js';
+import { zoneLabel, stockStatus, statusMeta } from '../../utils/stock.js';
 
-export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onAdd, onEdit }) {
+export function ZoneDetail({ zone, zones, isStockZone, items, onBack, onSelectZone, onAdd, onEdit }) {
   const [search, setSearch]                 = useState('');
   const [categoryFilter, setCategoryFilter]  = useState('');
   const [statusFilter, setStatusFilter]      = useState('');
@@ -21,8 +21,8 @@ export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onA
     <div>
       <div className="v-section-head">
         <div>
-          <div className="v-eyebrow">Operaciones · {zoneLabel(zone)}</div>
-          <h1 className="v-section-title">Inventario <em>{zoneLabel(zone).toLowerCase()}</em>.</h1>
+          <div className="v-eyebrow">Operaciones · {zoneLabel(zones, zone)}</div>
+          <h1 className="v-section-title">Inventario <em>{zoneLabel(zones, zone).toLowerCase()}</em>.</h1>
         </div>
         <button className="v-btn" onClick={onBack}>
           <Icon name="chevron_right" size={12} style={{ transform: 'rotate(180deg)' }} /> Todas las zonas
@@ -30,7 +30,7 @@ export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onA
       </div>
 
       <div className="v-zone-pills">
-        {ZONES.map(z => (
+        {zones.map(z => (
           <button key={z.id} className={`v-pill${z.id === zone ? ' active' : ''}`} onClick={() => onSelectZone(z.id)}>
             {z.label}
           </button>
@@ -40,7 +40,7 @@ export function ZoneDetail({ zone, isStockZone, items, onBack, onSelectZone, onA
       <div className="v-card">
         <div className="v-chart-head">
           <div>
-            <div className="v-chart-title">{zoneLabel(zone)}</div>
+            <div className="v-chart-title">{zoneLabel(zones, zone)}</div>
             <div className="v-chart-sub">{filtered.length} de {items.length} producto{items.length === 1 ? '' : 's'}</div>
           </div>
           <button className="v-btn primary" onClick={onAdd}>

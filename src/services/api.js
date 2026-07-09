@@ -61,6 +61,13 @@ export const api = {
   deleteFurniture: (id) =>
     fetch(`${BASE}/api/furniture/${id}`, { method: 'DELETE' }).then(json),
 
+  createProperty: (data) =>
+    fetch(`${BASE}/api/properties`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
   exportUrl: (params) =>
     `${BASE}/api/export/excel?${new URLSearchParams(params)}`,
 };

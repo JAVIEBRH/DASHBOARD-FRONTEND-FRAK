@@ -108,7 +108,7 @@ export default function App() {
               {view === 'budget'       && <Budget transactions={data.transactions} categoryMeta={data.categoryMeta} />}
               {view === 'stock'        && (
                 <Stock
-                  stock={data.stock} furniture={data.furniture}
+                  stock={data.stock} furniture={data.furniture} stockProperties={data.stockProperties} setData={setData}
                   addStockItem={addStockItem} editStockItem={editStockItem} deleteStockItem={deleteStockItem}
                   addFurnitureItem={addFurnitureItem} editFurnitureItem={editFurnitureItem} deleteFurnitureItem={deleteFurnitureItem}
                   showToast={showToast}

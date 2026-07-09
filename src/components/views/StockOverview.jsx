@@ -1,7 +1,8 @@
 // src/components/views/StockOverview.jsx
-import { ZONES, zoneStats, statusMeta } from '../../utils/stock.js';
+import { Icon } from '../ui/Icon.jsx';
+import { zoneStats, statusMeta } from '../../utils/stock.js';
 
-export function StockOverview({ stock, furniture, onSelectZone }) {
+export function StockOverview({ propertyName, zones, stock, furniture, onSelectZone, onBackToProperties }) {
   const totalProductos = stock.length + furniture.length;
   // "Por agotar" y "Agotados" son métricas de alerta — solo tiene sentido medirlas sobre
   // consumibles (un mueble faltante no es una alerta de reposición, es un dato de inventario).
@@ -13,17 +14,20 @@ export function StockOverview({ stock, furniture, onSelectZone }) {
     <div>
       <div className="v-section-head">
         <div>
-          <div className="v-eyebrow">Operaciones</div>
+          <div className="v-eyebrow">Operaciones · {propertyName}</div>
           <h1 className="v-section-title">Inventario <em>por zona</em>.</h1>
-          <p className="v-section-sub">Consumibles y activos fijos de Casa PAC, agrupados por dónde viven.</p>
+          <p className="v-section-sub">Consumibles y activos fijos, agrupados por dónde viven.</p>
         </div>
+        <button className="v-btn" onClick={onBackToProperties}>
+          <Icon name="chevron_right" size={12} style={{ transform: 'rotate(180deg)' }} /> Otras propiedades
+        </button>
       </div>
 
       <div className="v-kpi-hero">
         <div className="v-kpi-cell primary">
           <div className="v-kpi-label">Total productos</div>
           <div className="v-kpi-value">{totalProductos}</div>
-          <div className="v-kpi-sub">En {ZONES.length} zonas</div>
+          <div className="v-kpi-sub">En {zones.length} zonas</div>
         </div>
         <div className="v-kpi-cell">
           <div className="v-kpi-label">Por agotar</div>
@@ -38,7 +42,7 @@ export function StockOverview({ stock, furniture, onSelectZone }) {
       </div>
 
       <div className="v-zone-grid">
-        {ZONES.map(z => {
+        {zones.map(z => {
           const isStockZone = z.id === 'stock';
           const zoneItems = isStockZone ? stock : furniture.filter(f => f.zone === z.id);
           const stats = zoneStats(zoneItems, isStockZone);

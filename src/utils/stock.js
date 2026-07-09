@@ -1,18 +1,7 @@
 // src/utils/stock.js
-export const ZONES = [
-  { id: 'stock',       label: 'Stock' },
-  { id: 'living',      label: 'Living' },
-  { id: 'comedor',     label: 'Comedor' },
-  { id: 'cocina',      label: 'Cocina' },
-  { id: 'baño',        label: 'Baño' },
-  { id: 'lavanderia',  label: 'Lavandería' },
-  { id: 'dormitorio1', label: 'Dormitorio 1' },
-  { id: 'dormitorio2', label: 'Dormitorio 2' },
-  { id: 'dormitorio3', label: 'Dormitorio 3' },
-];
 
-export function zoneLabel(zoneId) {
-  return ZONES.find(z => z.id === zoneId)?.label ?? zoneId;
+export function zoneLabel(zones, zoneId) {
+  return zones.find(z => z.id === zoneId)?.label ?? zoneId;
 }
 
 // Alertas de verdad (badge del sidebar, toast al cargar, umbral configurable) — solo aplican a

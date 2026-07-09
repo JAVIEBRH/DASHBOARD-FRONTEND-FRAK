@@ -20,7 +20,7 @@ function validate(f, isStockZone) {
   return e;
 }
 
-export function StockModal({ open, item, isStockZone, zone, onSave, onDelete, onClose }) {
+export function StockModal({ open, item, isStockZone, zone, zones, onSave, onDelete, onClose }) {
   const [form, setForm]          = useState(EMPTY);
   const [errors, setErrors]      = useState({});
   const [confirmDel, setConfirm] = useState(false);
@@ -71,7 +71,7 @@ export function StockModal({ open, item, isStockZone, zone, onSave, onDelete, on
       <div className="v-modal" onClick={e => e.stopPropagation()}>
         <div className="v-modal-head">
           <div>
-            <div className="v-modal-eyebrow">{isEdit ? 'Editar' : 'Nuevo producto'}{zone ? ` · ${zoneLabel(zone)}` : ''}</div>
+            <div className="v-modal-eyebrow">{isEdit ? 'Editar' : 'Nuevo producto'}{zone ? ` · ${zoneLabel(zones, zone)}` : ''}</div>
             <div className="v-modal-title">{isEdit ? 'Editar producto' : 'Nuevo producto'}</div>
           </div>
           <button className="v-modal-close" onClick={onClose}>
