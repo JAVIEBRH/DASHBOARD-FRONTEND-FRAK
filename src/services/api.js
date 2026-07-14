@@ -68,6 +68,57 @@ export const api = {
       body: JSON.stringify(data),
     }).then(json),
 
+  createEstadia: (data) =>
+    fetch(`${BASE}/api/airbnb?resource=estadias`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  updateEstadia: (id, data) =>
+    fetch(`${BASE}/api/airbnb?resource=estadias&id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  deleteEstadia: (id) =>
+    fetch(`${BASE}/api/airbnb?resource=estadias&id=${id}`, { method: 'DELETE' }).then(json),
+
+  createLimpieza: (data) =>
+    fetch(`${BASE}/api/airbnb?resource=limpiezas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  updateLimpieza: (id, data) =>
+    fetch(`${BASE}/api/airbnb?resource=limpiezas&id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  deleteLimpieza: (id) =>
+    fetch(`${BASE}/api/airbnb?resource=limpiezas&id=${id}`, { method: 'DELETE' }).then(json),
+
+  createKanbanTask: (data) =>
+    fetch(`${BASE}/api/airbnb?resource=kanban`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  updateKanbanTask: (id, data) =>
+    fetch(`${BASE}/api/airbnb?resource=kanban&id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(json),
+
+  deleteKanbanTask: (id) =>
+    fetch(`${BASE}/api/airbnb?resource=kanban&id=${id}`, { method: 'DELETE' }).then(json),
+
   exportUrl: (params) =>
     `${BASE}/api/export/excel?${new URLSearchParams(params)}`,
 };

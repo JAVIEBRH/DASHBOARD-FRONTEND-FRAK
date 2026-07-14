@@ -5,6 +5,9 @@ import { useFilter } from './hooks/useFilter.js';
 import { useToast } from './hooks/useToast.js';
 import { useStock } from './hooks/useStock.js';
 import { useFurniture } from './hooks/useFurniture.js';
+import { useEstadias } from './hooks/useEstadias.js';
+import { useLimpiezas } from './hooks/useLimpiezas.js';
+import { useKanbanTasks } from './hooks/useKanbanTasks.js';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { Topbar } from './components/layout/Topbar.jsx';
 import { ToastContainer } from './components/ui/Toast.jsx';
@@ -18,7 +21,9 @@ import { Gastos } from './components/views/Gastos.jsx';
 import { Socio } from './components/views/Socio.jsx';
 import { Budget } from './components/views/Budget.jsx';
 import { Stock } from './components/views/Stock.jsx';
-import { AirbnbPlaceholder } from './components/views/AirbnbPlaceholder.jsx';
+import { AirbnbResumen } from './components/views/AirbnbResumen.jsx';
+import { AirbnbCalendar } from './components/views/AirbnbCalendar.jsx';
+import { AirbnbKanban } from './components/views/AirbnbKanban.jsx';
 import { isLowStockConsumible } from './utils/stock.js';
 
 const VIEW_TITLE = {
@@ -49,6 +54,9 @@ export default function App() {
   const { toasts, showToast } = useToast();
   const { addStockItem, editStockItem, deleteStockItem } = useStock(data, setData);
   const { addFurnitureItem, editFurnitureItem, deleteFurnitureItem } = useFurniture(data, setData);
+  const { addEstadia, editEstadia, deleteEstadia } = useEstadias(data, setData);
+  const { addLimpieza, editLimpieza, deleteLimpieza } = useLimpiezas(data, setData);
+  const { addKanbanTask, editKanbanTask, deleteKanbanTask } = useKanbanTasks(data, setData);
 
   const toastedLowStockRef = useRef(false);
   useEffect(() => {
@@ -135,16 +143,21 @@ export default function App() {
                 />
               )}
               {view === 'airbnb_resumen' && (
-                <AirbnbPlaceholder title="Resumen" icon="leaf"
-                  description="Vista general de reservas, stock y tareas — próximamente" />
+                <AirbnbResumen estadias={data.estadias} stock={data.stock} kanbanTasks={data.kanbanTasks} setView={setView} />
               )}
               {view === 'airbnb_calendario' && (
-                <AirbnbPlaceholder title="Calendario" icon="calendar"
-                  description="Calendario de reservas tipo Airbnb — próximamente" />
+                <AirbnbCalendar
+                  estadias={data.estadias} limpiezas={data.limpiezas}
+                  year={year} period={period} monthsOrder={monthsOrder} monthLabels={data.monthLabels}
+                  addEstadia={addEstadia} editEstadia={editEstadia} deleteEstadia={deleteEstadia}
+                  addLimpieza={addLimpieza} editLimpieza={editLimpieza} deleteLimpieza={deleteLimpieza}
+                />
               )}
               {view === 'airbnb_kanban' && (
-                <AirbnbPlaceholder title="Kanban" icon="columns"
-                  description="Tablero de tareas — próximamente" />
+                <AirbnbKanban
+                  tasks={data.kanbanTasks}
+                  addKanbanTask={addKanbanTask} editKanbanTask={editKanbanTask} deleteKanbanTask={deleteKanbanTask}
+                />
               )}
             </>
           )}
