@@ -176,6 +176,13 @@ button { font-family: inherit; }
   font-weight: 600;
   box-shadow: inset 3px 0 0 var(--emerald-2);
 }
+.v-nav-item.semi-active {
+  color: var(--emerald);
+}
+.v-nav-item.sub {
+  padding-left: 30px;
+  font-size: 12.5px;
+}
 
 .v-nav-item.supreme-pos {
   background: rgba(24,160,88,0.08);

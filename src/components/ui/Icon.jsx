@@ -20,6 +20,7 @@ const ICONS = {
   bell:          'M5 9a5 5 0 0110 0v3l1.5 2H3.5L5 12V9zM8 17a2 2 0 004 0',
   coin:          'M10 18a8 8 0 100-16 8 8 0 000 16zM7 8h5a1.5 1.5 0 010 3H8a1.5 1.5 0 000 3h5',
   box:           'M3 6l7-3 7 3-7 3-7-3zM3 6v8l7 3 7-3V6M10 9v8',
+  columns:       'M3 4h5v12H3zM8 4h4v12H8zM13 4h4v12h-4z',
 };
 
 export function Icon({ name, size = 16, color = 'currentColor', strokeWidth = 1.5, style }) {

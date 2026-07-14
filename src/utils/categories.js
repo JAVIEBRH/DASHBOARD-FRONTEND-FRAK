@@ -10,11 +10,16 @@ export const NAV_GROUPS = [
     { id: 'calendar',     label: 'Vista mensual',   icon: 'calendar' },
     { id: 'gastos',       label: 'Costos',          icon: 'chart'    },
   ]},
-  { label: 'Negocios', items: [
-    { id: 'ave_austral', label: 'Ave Austral', icon: 'sparkle' },
-  ]},
-  { label: 'Operaciones', items: [
-    { id: 'stock', label: 'Stock', icon: 'box' },
+  { label: 'Airbnb', items: [
+    {
+      id: 'airbnb', label: 'Airbnb', icon: 'home', expandable: true,
+      children: [
+        { id: 'airbnb_resumen',    label: 'Resumen',    icon: 'leaf'     },
+        { id: 'airbnb_calendario', label: 'Calendario', icon: 'calendar' },
+        { id: 'stock',             label: 'Stock',      icon: 'box'      },
+        { id: 'airbnb_kanban',     label: 'Kanban',     icon: 'columns'  },
+      ],
+    },
   ]},
   { label: 'Socio', items: [
     { id: 'socio', label: 'Mov. de socio', icon: 'wallet' },

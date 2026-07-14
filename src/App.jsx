@@ -16,9 +16,9 @@ import { Transactions } from './components/views/Transactions.jsx';
 import { Calendar } from './components/views/Calendar.jsx';
 import { Gastos } from './components/views/Gastos.jsx';
 import { Socio } from './components/views/Socio.jsx';
-import { AveAustral } from './components/views/AveAustral.jsx';
 import { Budget } from './components/views/Budget.jsx';
 import { Stock } from './components/views/Stock.jsx';
+import { AirbnbPlaceholder } from './components/views/AirbnbPlaceholder.jsx';
 import { isLowStockConsumible } from './utils/stock.js';
 
 const VIEW_TITLE = {
@@ -29,13 +29,16 @@ const VIEW_TITLE = {
   calendar: 'Vista mensual',
   gastos: 'Costos',
   socio: 'Mov. de socio',
-  ave_austral: 'Ave Austral',
   budget: 'Presupuesto 2026',
   stock: 'Stock',
+  airbnb_resumen: 'Airbnb · Resumen',
+  airbnb_calendario: 'Airbnb · Calendario',
+  airbnb_kanban: 'Airbnb · Kanban',
 };
 
 export default function App() {
   const [view, setView] = useState('overview');
+  const [expandedGroup, setExpandedGroup] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTx, setEditTx] = useState(null);
 
@@ -55,6 +58,20 @@ export default function App() {
       if (n > 0) showToast(`Tienes ${n} producto${n === 1 ? '' : 's'} con stock bajo`, 'error');
     }
   }, [loading, data]);
+
+  useEffect(() => {
+    if (view === 'stock' || view.startsWith('airbnb_')) setExpandedGroup('airbnb');
+  }, [view]);
+
+  const handleToggleGroup = (groupId) => {
+    const isExpanded = expandedGroup === groupId;
+    if (isExpanded) {
+      setExpandedGroup(null);
+    } else {
+      setExpandedGroup(groupId);
+      if (groupId === 'airbnb') setView('airbnb_resumen');
+    }
+  };
 
   const handleAdd = () => { setEditTx(null); setModalOpen(true); };
   const handleEdit = (tx) => { setEditTx(tx); setModalOpen(true); };
@@ -82,7 +99,11 @@ export default function App() {
 
   return (
     <div className="vault-app">
-      <Sidebar view={view} setView={setView} year={year} badgeCounts={{ stock: stockAlertCount }} />
+      <Sidebar
+        view={view} setView={setView} year={year}
+        badgeCounts={{ stock: stockAlertCount }}
+        expandedGroup={expandedGroup} onToggleGroup={handleToggleGroup}
+      />
       <main className="v-main">
         <Topbar
           title={VIEW_TITLE[view] ?? view}
@@ -104,7 +125,6 @@ export default function App() {
               {view === 'calendar'     && <Calendar {...viewProps} monthsOrder={monthsOrder} monthLabels={data.monthLabels} />}
               {view === 'gastos'       && <Gastos {...viewProps} />}
               {view === 'socio'        && <Socio {...viewProps} properties={data.properties} />}
-              {view === 'ave_austral'  && <AveAustral {...viewProps} />}
               {view === 'budget'       && <Budget transactions={data.transactions} categoryMeta={data.categoryMeta} />}
               {view === 'stock'        && (
                 <Stock
@@ -113,6 +133,18 @@ export default function App() {
                   addFurnitureItem={addFurnitureItem} editFurnitureItem={editFurnitureItem} deleteFurnitureItem={deleteFurnitureItem}
                   showToast={showToast}
                 />
+              )}
+              {view === 'airbnb_resumen' && (
+                <AirbnbPlaceholder title="Resumen" icon="leaf"
+                  description="Vista general de reservas, stock y tareas — próximamente" />
+              )}
+              {view === 'airbnb_calendario' && (
+                <AirbnbPlaceholder title="Calendario" icon="calendar"
+                  description="Calendario de reservas tipo Airbnb — próximamente" />
+              )}
+              {view === 'airbnb_kanban' && (
+                <AirbnbPlaceholder title="Kanban" icon="columns"
+                  description="Tablero de tareas — próximamente" />
               )}
             </>
           )}
