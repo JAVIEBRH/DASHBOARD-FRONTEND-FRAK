@@ -802,6 +802,8 @@ button { font-family: inherit; }
 .v-toast.deleted  { background: var(--ash); }
 .v-toast.info     { background: var(--ink); }
 .v-toast.error    { background: var(--terra-2); }
+.v-toast.clickable { cursor: pointer; transition: transform .12s; }
+.v-toast.clickable:hover { transform: translateY(-2px); }
 
 /* ── Calendar ── */
 .v-month-card {

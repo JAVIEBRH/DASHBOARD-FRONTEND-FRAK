@@ -63,7 +63,12 @@ export default function App() {
     if (!loading && data && !toastedLowStockRef.current) {
       toastedLowStockRef.current = true;
       const n = data.stock.filter(isLowStockConsumible).length;
-      if (n > 0) showToast(`Tienes ${n} producto${n === 1 ? '' : 's'} con stock bajo`, 'error');
+      if (n > 0) {
+        showToast(`Tienes ${n} producto${n === 1 ? '' : 's'} con stock bajo — click para ver`, 'error', {
+          duration: 8000,
+          onClick: () => setView('stock'),
+        });
+      }
     }
   }, [loading, data]);
 
