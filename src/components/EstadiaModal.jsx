@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from './ui/Icon.jsx';
 
-const EMPTY = { guestName: '', checkIn: '', checkOut: '', notes: '' };
+const EMPTY = { guestName: '', checkIn: '', checkOut: '', monto: '', notes: '' };
 
 function validate(f) {
   const e = {};
@@ -10,6 +10,7 @@ function validate(f) {
   if (!f.checkIn)  e.checkIn = 'La fecha de check-in es requerida';
   if (!f.checkOut) e.checkOut = 'La fecha de check-out es requerida';
   if (f.checkIn && f.checkOut && f.checkOut < f.checkIn) e.checkOut = 'El check-out no puede ser antes del check-in';
+  if (f.monto !== '' && (isNaN(Number(f.monto)) || Number(f.monto) < 0)) e.monto = 'Ingresa un monto válido';
   return e;
 }
 
@@ -23,7 +24,7 @@ export function EstadiaModal({ open, item, defaultDate, onSave, onDelete, onClos
       if (item) {
         setForm({
           guestName: item.guestName, checkIn: item.checkIn, checkOut: item.checkOut,
-          notes: item.notes ?? '',
+          monto: item.monto ?? '', notes: item.notes ?? '',
         });
       } else {
         setForm({ ...EMPTY, checkIn: defaultDate ?? '', checkOut: defaultDate ?? '' });
@@ -48,6 +49,7 @@ export function EstadiaModal({ open, item, defaultDate, onSave, onDelete, onClos
       guestName: form.guestName.trim(),
       checkIn: form.checkIn,
       checkOut: form.checkOut,
+      monto: form.monto === '' ? null : Number(form.monto),
       notes: form.notes.trim(),
     });
   };
@@ -90,6 +92,15 @@ export function EstadiaModal({ open, item, defaultDate, onSave, onDelete, onClos
               type="date" value={form.checkOut} onChange={e => set('checkOut', e.target.value)} />
             {errors.checkOut && <div className="v-form-error">{errors.checkOut}</div>}
           </div>
+        </div>
+
+        <div className="v-form-row">
+          <div className="v-form-label">Monto (opcional)</div>
+          <input className={'v-input' + (errors.monto ? ' v-input-error' : '')}
+            type="number" min="0" placeholder="ej: 120000" value={form.monto}
+            onChange={e => set('monto', e.target.value)}
+            style={{ fontFamily: 'var(--font-mono)', textAlign: 'right', maxWidth: 200 }} />
+          {errors.monto && <div className="v-form-error">{errors.monto}</div>}
         </div>
 
         <div className="v-form-row">

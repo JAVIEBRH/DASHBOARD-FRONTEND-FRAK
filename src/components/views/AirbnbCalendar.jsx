@@ -3,10 +3,13 @@ import { useMemo, useState } from 'react';
 import { Icon } from '../ui/Icon.jsx';
 import { EstadiaModal } from '../EstadiaModal.jsx';
 import { LimpiezaModal } from '../LimpiezaModal.jsx';
+import { fmtCLP } from '../../utils/formatters.js';
 
 const MONTH_ABBR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 const BAR_COLORS = ['#3B82F6', '#C97356', '#7C3AED', '#18A058', '#D97706', '#EC4899'];
+
+const TODAY = new Date().toISOString().slice(0, 10);
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -72,50 +75,85 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
   }, [limpiezas, monthStart, monthEnd]);
 
   return (
-    <div style={{ marginBottom: 32 }}>
-      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, marginBottom: 10, textTransform: 'lowercase' }}>{label}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, marginBottom: 12, textTransform: 'lowercase', color: 'var(--ink)' }}>{label}</div>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
+        borderTop: '1px solid var(--line-2)', borderLeft: '1px solid var(--line-2)',
+      }}>
         {WEEKDAY_LABELS.map((d, i) => (
-          <div key={i} style={{ textAlign: 'center', fontSize: 11, color: 'var(--ink-3)', fontFamily: 'var(--font-mono)' }}>{d}</div>
+          <div key={i} style={{
+            textAlign: 'center', fontSize: 12.5, fontWeight: 600, color: 'var(--ink-2)',
+            fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em',
+            padding: '8px 0', background: 'var(--surface-2)',
+            borderRight: '1px solid var(--line-2)', borderBottom: '1px solid var(--line-2)',
+          }}>{d}</div>
         ))}
       </div>
       {weeks.map((week, rowIdx) => (
-        <div key={rowIdx} style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 22 }}>
-          {week.map((day, colIdx) => (
-            <div key={colIdx}
-              onClick={() => day && onDayClick(`${year}-${pad(monthIndex + 1)}-${pad(day)}`)}
-              style={{
-                minHeight: 46, borderRadius: 8, padding: '4px 6px',
-                background: day ? 'var(--surface-2)' : 'transparent',
-                cursor: day ? 'pointer' : 'default',
-                fontSize: 12.5, color: 'var(--ink-2)', fontFamily: 'var(--font-mono)',
-              }}>
-              {day}
-              {day && limpiezasByDay[day]?.map(l => (
-                <div key={l.id}
-                  onClick={e => { e.stopPropagation(); onCleaningClick(l); }}
-                  title={l.notes || 'Limpieza'}
-                  style={{ marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 3, background: 'var(--brass-soft)', color: 'var(--brass-2)', borderRadius: 6, padding: '1px 5px', fontSize: 9.5 }}>
-                  <Icon name="sparkle" size={9} /> limpieza
-                </div>
-              ))}
-            </div>
-          ))}
-          {stayBars.filter(b => b.rowIdx === rowIdx).map((b, i) => (
-            <div key={i}
-              onClick={e => { e.stopPropagation(); onBarClick(b.estadia); }}
-              style={{
-                position: 'absolute', top: 22, height: 22,
-                left: `calc(${(b.colStart / 7) * 100}% + 3px)`,
-                width: `calc(${(b.colSpan / 7) * 100}% - 6px)`,
-                background: colorFor(b.estadia.guestName), color: '#fff',
-                borderRadius: 11, display: 'flex', alignItems: 'center', gap: 6,
-                padding: '0 8px', fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
-              }}>
-              {b.estadia.guestName}
-            </div>
-          ))}
+        <div key={rowIdx} style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+          {week.map((day, colIdx) => {
+            const dateStr = day ? `${year}-${pad(monthIndex + 1)}-${pad(day)}` : null;
+            const isToday = dateStr === TODAY;
+            return (
+              <div key={colIdx}
+                onClick={() => day && onDayClick(dateStr)}
+                style={{
+                  minHeight: 58, padding: '6px 8px',
+                  background: day ? 'var(--surface)' : 'var(--bg-2)',
+                  cursor: day ? 'pointer' : 'default',
+                  borderRight: '1px solid var(--line-2)', borderBottom: '1px solid var(--line-2)',
+                  transition: 'background .12s',
+                }}
+                onMouseEnter={e => { if (day) e.currentTarget.style.background = 'var(--surface-2)'; }}
+                onMouseLeave={e => { if (day) e.currentTarget.style.background = 'var(--surface)'; }}
+              >
+                {day && (
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'var(--font-serif)', fontSize: 17,
+                    color: isToday ? 'var(--emerald)' : 'var(--ink)',
+                    fontWeight: isToday ? 700 : 400,
+                    width: 26, height: 26, borderRadius: '50%',
+                    boxShadow: isToday ? 'inset 0 0 0 1.5px var(--emerald)' : 'none',
+                  }}>{day}</span>
+                )}
+                {day && limpiezasByDay[day]?.map(l => (
+                  <div key={l.id}
+                    onClick={e => { e.stopPropagation(); onCleaningClick(l); }}
+                    title={l.notes || 'Limpieza'}
+                    style={{ marginTop: 5, display: 'inline-flex', alignItems: 'center', gap: 3, background: 'var(--brass-soft)', color: 'var(--brass-2)', borderRadius: 6, padding: '2px 6px', fontSize: 10 }}>
+                    <Icon name="sparkle" size={9} /> limpieza
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+          {stayBars.filter(b => b.rowIdx === rowIdx).map((b, i) => {
+            const tooltip = `${b.estadia.guestName}${b.estadia.monto ? ' · ' + fmtCLP(Number(b.estadia.monto), { sign: false }) : ''}`;
+            return (
+              <div key={i}
+                onClick={e => { e.stopPropagation(); onBarClick(b.estadia); }}
+                title={tooltip}
+                style={{
+                  position: 'absolute', top: 38, height: 24,
+                  left: `calc(${(b.colStart / 7) * 100}% + 4px)`,
+                  width: `calc(${(b.colSpan / 7) * 100}% - 8px)`,
+                  background: colorFor(b.estadia.guestName), color: '#fff',
+                  borderRadius: 12, display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '0 8px 0 3px', fontSize: 11.5, fontWeight: 500, cursor: 'pointer',
+                  overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                }}>
+                <span style={{
+                  flexShrink: 0, width: 18, height: 18, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', fontSize: 10, fontWeight: 700,
+                }}>{b.estadia.guestName.trim().charAt(0).toUpperCase()}</span>
+                {b.estadia.guestName}
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>
