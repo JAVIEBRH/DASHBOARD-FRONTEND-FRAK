@@ -151,12 +151,14 @@ export default function App() {
                   year={year} period={period} monthsOrder={monthsOrder} monthLabels={data.monthLabels}
                   addEstadia={addEstadia} editEstadia={editEstadia} deleteEstadia={deleteEstadia}
                   addLimpieza={addLimpieza} editLimpieza={editLimpieza} deleteLimpieza={deleteLimpieza}
+                  showToast={showToast}
                 />
               )}
               {view === 'airbnb_kanban' && (
                 <AirbnbKanban
                   tasks={data.kanbanTasks}
                   addKanbanTask={addKanbanTask} editKanbanTask={editKanbanTask} deleteKanbanTask={deleteKanbanTask}
+                  showToast={showToast}
                 />
               )}
             </>

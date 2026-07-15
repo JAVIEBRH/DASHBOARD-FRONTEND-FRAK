@@ -122,7 +122,7 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
   );
 }
 
-export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder, monthLabels, addEstadia, editEstadia, deleteEstadia, addLimpieza, editLimpieza, deleteLimpieza }) {
+export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder, monthLabels, addEstadia, editEstadia, deleteEstadia, addLimpieza, editLimpieza, deleteLimpieza, showToast }) {
   const [estadiaModal, setEstadiaModal] = useState(null); // { item, defaultDate } | null
   const [limpiezaModal, setLimpiezaModal] = useState(null);
 
@@ -173,11 +173,18 @@ export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder,
         defaultDate={estadiaModal?.defaultDate}
         onClose={() => setEstadiaModal(null)}
         onSave={(data) => {
-          if (estadiaModal?.item) editEstadia(estadiaModal.item.id, data);
-          else addEstadia(data);
+          if (estadiaModal?.item) {
+            editEstadia(estadiaModal.item.id, data);
+            showToast?.('Estadía actualizada');
+          } else {
+            addEstadia(data);
+            const checkInYear = data.checkIn.slice(0, 4);
+            const yearHint = checkInYear !== year ? ` — selecciona el año ${checkInYear} arriba para verla` : '';
+            showToast?.(`Estadía registrada${yearHint}`);
+          }
           setEstadiaModal(null);
         }}
-        onDelete={(id) => { deleteEstadia(id); setEstadiaModal(null); }}
+        onDelete={(id) => { deleteEstadia(id); showToast?.('Estadía eliminada', 'deleted'); setEstadiaModal(null); }}
       />
 
       <LimpiezaModal
@@ -186,11 +193,18 @@ export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder,
         defaultDate={limpiezaModal?.defaultDate}
         onClose={() => setLimpiezaModal(null)}
         onSave={(data) => {
-          if (limpiezaModal?.item) editLimpieza(limpiezaModal.item.id, data);
-          else addLimpieza(data);
+          if (limpiezaModal?.item) {
+            editLimpieza(limpiezaModal.item.id, data);
+            showToast?.('Limpieza actualizada');
+          } else {
+            addLimpieza(data);
+            const dateYear = data.date.slice(0, 4);
+            const yearHint = dateYear !== year ? ` — selecciona el año ${dateYear} arriba para verla` : '';
+            showToast?.(`Limpieza agendada${yearHint}`);
+          }
           setLimpiezaModal(null);
         }}
-        onDelete={(id) => { deleteLimpieza(id); setLimpiezaModal(null); }}
+        onDelete={(id) => { deleteLimpieza(id); showToast?.('Limpieza eliminada', 'deleted'); setLimpiezaModal(null); }}
       />
     </div>
   );

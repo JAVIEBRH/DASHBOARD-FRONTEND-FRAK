@@ -9,7 +9,7 @@ const COLUMNS = [
   { status: 'done',  label: 'Hecho' },
 ];
 
-export function AirbnbKanban({ tasks, addKanbanTask, editKanbanTask, deleteKanbanTask }) {
+export function AirbnbKanban({ tasks, addKanbanTask, editKanbanTask, deleteKanbanTask, showToast }) {
   const [modalTask, setModalTask] = useState(undefined); // undefined = closed, null = new, obj = edit
 
   const move = (task, dir) => {
@@ -75,11 +75,16 @@ export function AirbnbKanban({ tasks, addKanbanTask, editKanbanTask, deleteKanba
         item={modalTask ?? null}
         onClose={() => setModalTask(undefined)}
         onSave={(data) => {
-          if (modalTask) editKanbanTask(modalTask.id, data);
-          else addKanbanTask(data);
+          if (modalTask) {
+            editKanbanTask(modalTask.id, data);
+            showToast?.('Tarea actualizada');
+          } else {
+            addKanbanTask(data);
+            showToast?.('Tarea creada');
+          }
           setModalTask(undefined);
         }}
-        onDelete={(id) => { deleteKanbanTask(id); setModalTask(undefined); }}
+        onDelete={(id) => { deleteKanbanTask(id); showToast?.('Tarea eliminada', 'deleted'); setModalTask(undefined); }}
       />
     </div>
   );
