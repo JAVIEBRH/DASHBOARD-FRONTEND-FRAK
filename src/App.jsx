@@ -45,6 +45,7 @@ const VIEW_TITLE = {
 export default function App() {
   const [view, setView] = useState('overview');
   const [expandedGroup, setExpandedGroup] = useState(null);
+  const [activePropertyId, setActivePropertyId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTx, setEditTx] = useState(null);
 
@@ -152,6 +153,7 @@ export default function App() {
               {view === 'stock'        && (
                 <Stock
                   stock={data.stock} furniture={data.furniture} stockProperties={data.stockProperties} setData={setData}
+                  propertyId={activePropertyId} setPropertyId={setActivePropertyId}
                   addStockItem={addStockItem} editStockItem={editStockItem} deleteStockItem={deleteStockItem}
                   addFurnitureItem={addFurnitureItem} editFurnitureItem={editFurnitureItem} deleteFurnitureItem={deleteFurnitureItem}
                   showToast={showToast}
@@ -164,6 +166,7 @@ export default function App() {
                 <AirbnbCalendar
                   estadias={data.estadias} limpiezas={data.limpiezas}
                   stockProperties={data.stockProperties} addProperty={addProperty}
+                  propertyId={activePropertyId} setPropertyId={setActivePropertyId}
                   year={year} period={period} monthsOrder={monthsOrder} monthLabels={data.monthLabels}
                   addEstadia={addEstadia} editEstadia={editEstadia} deleteEstadia={deleteEstadia}
                   addLimpieza={addLimpieza} editLimpieza={editLimpieza} deleteLimpieza={deleteLimpieza}
@@ -174,6 +177,7 @@ export default function App() {
                 <AirbnbKanban
                   tasks={data.kanbanTasks}
                   stockProperties={data.stockProperties} addProperty={addProperty}
+                  propertyId={activePropertyId} setPropertyId={setActivePropertyId}
                   addKanbanTask={addKanbanTask} editKanbanTask={editKanbanTask} deleteKanbanTask={deleteKanbanTask}
                   showToast={showToast}
                 />

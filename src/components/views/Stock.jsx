@@ -9,11 +9,11 @@ import { useProperties } from '../../hooks/useProperties.js';
 
 export function Stock({
   stock, furniture, stockProperties, setData,
+  propertyId, setPropertyId,
   addStockItem, editStockItem, deleteStockItem,
   addFurnitureItem, editFurnitureItem, deleteFurnitureItem,
   showToast,
 }) {
-  const [propertyId, setPropertyId] = useState(null);
   const [zone, setZone]             = useState(null);
   const [modalOpen, setModalOpen]   = useState(false);
   const [editItem, setEditItem]     = useState(null);

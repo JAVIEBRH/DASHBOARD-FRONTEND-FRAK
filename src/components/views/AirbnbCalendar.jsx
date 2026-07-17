@@ -1,5 +1,5 @@
 // src/components/views/AirbnbCalendar.jsx
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Icon } from '../ui/Icon.jsx';
 import { EstadiaModal } from '../EstadiaModal.jsx';
 import { LimpiezaModal } from '../LimpiezaModal.jsx';
@@ -209,8 +209,7 @@ export function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBar
   );
 }
 
-export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProperty, year, period, monthsOrder, monthLabels, addEstadia, editEstadia, deleteEstadia, addLimpieza, editLimpieza, deleteLimpieza, showToast }) {
-  const [propertyId, setPropertyId] = useState(null);
+export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProperty, propertyId, setPropertyId, year, period, monthsOrder, monthLabels, addEstadia, editEstadia, deleteEstadia, addLimpieza, editLimpieza, deleteLimpieza, showToast }) {
   const [addPropertyOpen, setAddPropertyOpen] = useState(false);
   const [estadiaModal, setEstadiaModal] = useState(null); // { item, defaultDate } | null
   const [limpiezaModal, setLimpiezaModal] = useState(null);
@@ -226,6 +225,15 @@ export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProper
 
   const openNewEstadia = () => setEstadiaModal({ item: null, defaultDate: null });
   const openNewLimpieza = () => setLimpiezaModal({ item: null, defaultDate: null });
+
+  useEffect(() => {
+    if (!property || period !== 'all') return;
+    const now = new Date();
+    if (yearNum !== now.getFullYear()) return;
+    const currentMonthToken = `${MONTH_ABBR[now.getMonth()]}-${String(yearNum).slice(-2)}`;
+    const el = document.getElementById(`airbnb-month-${currentMonthToken}`);
+    el?.scrollIntoView({ behavior: 'auto', block: 'start' });
+  }, [property, period, yearNum]);
 
   const handleAddProperty = async (data) => {
     const id = await addProperty(data);
@@ -275,14 +283,16 @@ export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProper
         {monthsToShow.map(m => {
           const monthIdx = MONTH_ABBR.indexOf(m.slice(0, 3));
           return (
-            <MonthBlock key={m}
-              year={yearNum} monthIndex={monthIdx} label={monthLabels?.[m] ?? m}
-              estadias={propertyEstadias} limpiezas={propertyLimpiezas}
-              onBarClick={(estadia) => setEstadiaModal({ item: estadia, defaultDate: null })}
-              onDayClick={(dateStr) => setEstadiaModal({ item: null, defaultDate: dateStr })}
-              onCleaningClick={(limpieza) => setLimpiezaModal({ item: limpieza, defaultDate: null })}
-              onSuggestCleaning={(dateStr) => setLimpiezaModal({ item: null, defaultDate: dateStr })}
-            />
+            <div key={m} id={`airbnb-month-${m}`}>
+              <MonthBlock
+                year={yearNum} monthIndex={monthIdx} label={monthLabels?.[m] ?? m}
+                estadias={propertyEstadias} limpiezas={propertyLimpiezas}
+                onBarClick={(estadia) => setEstadiaModal({ item: estadia, defaultDate: null })}
+                onDayClick={(dateStr) => setEstadiaModal({ item: null, defaultDate: dateStr })}
+                onCleaningClick={(limpieza) => setLimpiezaModal({ item: limpieza, defaultDate: null })}
+                onSuggestCleaning={(dateStr) => setLimpiezaModal({ item: null, defaultDate: dateStr })}
+              />
+            </div>
           );
         })}
       </div>

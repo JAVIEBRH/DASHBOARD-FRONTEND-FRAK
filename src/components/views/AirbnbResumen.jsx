@@ -46,6 +46,12 @@ export function AirbnbResumen({ estadias, limpiezas, stock, kanbanTasks, stockPr
   const currentYear = now.getFullYear();
   const currentMonthIndex = now.getMonth();
 
+  const todayCheckIns = estadias.filter(e => e.checkIn === today);
+  const todayCheckOuts = estadias.filter(e => e.checkOut === today);
+  const todayLimpiezas = limpiezas.filter(l => l.date === today && !l.done);
+  const hasTodayItems = todayCheckIns.length > 0 || todayCheckOuts.length > 0 || todayLimpiezas.length > 0;
+  const todayLabel = now.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' });
+
   return (
     <div>
       <div className="v-section-head">
@@ -54,6 +60,43 @@ export function AirbnbResumen({ estadias, limpiezas, stock, kanbanTasks, stockPr
           <h1 className="v-section-title">Resumen.</h1>
           <p className="v-section-sub">Vista general de reservas, stock y tareas.</p>
         </div>
+      </div>
+
+      <div className="v-card" style={{ padding: 16, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexShrink: 0 }}>
+          <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17 }}>Hoy</span>
+          <span style={{ fontSize: 11.5, color: 'var(--ink-3)', fontFamily: 'var(--font-mono)' }}>{todayLabel}</span>
+        </div>
+        {!hasTodayItems ? (
+          <span style={{ fontSize: 13, color: 'var(--ink-3)' }}>Sin check-ins, check-outs ni limpiezas pendientes.</span>
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {todayCheckIns.map(e => (
+              <span key={'in-' + e.id} onClick={() => setView('airbnb_calendario')} style={{
+                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12,
+                background: 'var(--signal-pos-soft)', color: '#0F5132', borderRadius: 7, padding: '4px 9px',
+              }}>
+                <Icon name="arrow_down" size={11} /> Llega {e.guestName} · {propertyName(e.property)}
+              </span>
+            ))}
+            {todayCheckOuts.map(e => (
+              <span key={'out-' + e.id} onClick={() => setView('airbnb_calendario')} style={{
+                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12,
+                background: 'var(--surface-2)', color: 'var(--ink-2)', borderRadius: 7, padding: '4px 9px',
+              }}>
+                <Icon name="arrow_up" size={11} /> Sale {e.guestName} · {propertyName(e.property)}
+              </span>
+            ))}
+            {todayLimpiezas.map(l => (
+              <span key={'lim-' + l.id} onClick={() => setView('airbnb_calendario')} style={{
+                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12,
+                background: 'var(--brass-soft)', color: 'var(--brass-2)', borderRadius: 7, padding: '4px 9px',
+              }}>
+                <Icon name="sparkle" size={11} /> Limpieza pendiente · {propertyName(l.property)}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="v-kpi-row" style={{ marginBottom: 20 }}>

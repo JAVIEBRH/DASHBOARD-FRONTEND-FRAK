@@ -11,8 +11,7 @@ const COLUMNS = [
   { status: 'done',  label: 'Hecho' },
 ];
 
-export function AirbnbKanban({ tasks, stockProperties, addProperty, addKanbanTask, editKanbanTask, deleteKanbanTask, showToast }) {
-  const [propertyId, setPropertyId] = useState(null);
+export function AirbnbKanban({ tasks, stockProperties, addProperty, propertyId, setPropertyId, addKanbanTask, editKanbanTask, deleteKanbanTask, showToast }) {
   const [addPropertyOpen, setAddPropertyOpen] = useState(false);
   const [modalTask, setModalTask] = useState(undefined); // undefined = closed, null = new, obj = edit
 
