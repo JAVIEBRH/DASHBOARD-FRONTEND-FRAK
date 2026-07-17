@@ -52,10 +52,18 @@ function monthBarSegments(weeks, daysInMonth, clippedStart, clippedEnd) {
   return segments;
 }
 
-function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, onDayClick, onCleaningClick }) {
+function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, onDayClick, onCleaningClick, onSuggestCleaning }) {
   const { weeks, daysInMonth } = useMemo(() => buildMonthGrid(year, monthIndex), [year, monthIndex]);
   const monthStart = `${year}-${pad(monthIndex + 1)}-01`;
   const monthEnd = `${year}-${pad(monthIndex + 1)}-${pad(daysInMonth)}`;
+
+  const checkoutDays = useMemo(() => {
+    const set = new Set();
+    estadias.forEach(e => {
+      if (e.checkOut >= monthStart && e.checkOut <= monthEnd) set.add(Number(e.checkOut.slice(8, 10)));
+    });
+    return set;
+  }, [estadias, monthStart, monthEnd]);
 
   const stayBars = useMemo(() => {
     return estadias
@@ -128,6 +136,18 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
                     <Icon name="sparkle" size={9} /> limpieza
                   </div>
                 ))}
+                {day && checkoutDays.has(day) && !limpiezasByDay[day] && (
+                  <div
+                    onClick={e => { e.stopPropagation(); onSuggestCleaning(dateStr); }}
+                    title="Sale un huésped este día — sugerencia: agenda una limpieza"
+                    style={{
+                      marginTop: 5, display: 'inline-flex', alignItems: 'center', gap: 3,
+                      border: '1px dashed var(--brass-2)', color: 'var(--brass-2)',
+                      borderRadius: 6, padding: '2px 6px', fontSize: 9.5, cursor: 'pointer',
+                    }}>
+                    <Icon name="plus" size={9} /> sugerir limpieza
+                  </div>
+                )}
               </div>
             );
           })}
@@ -234,6 +254,7 @@ export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProper
               onBarClick={(estadia) => setEstadiaModal({ item: estadia, defaultDate: null })}
               onDayClick={(dateStr) => setEstadiaModal({ item: null, defaultDate: dateStr })}
               onCleaningClick={(limpieza) => setLimpiezaModal({ item: limpieza, defaultDate: null })}
+              onSuggestCleaning={(dateStr) => setLimpiezaModal({ item: null, defaultDate: dateStr })}
             />
           );
         })}

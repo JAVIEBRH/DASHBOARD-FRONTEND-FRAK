@@ -1,6 +1,6 @@
 // src/components/views/AirbnbResumen.jsx
 import { Icon } from '../ui/Icon.jsx';
-import { fmtDate } from '../../utils/formatters.js';
+import { fmtDate, fmtCLP } from '../../utils/formatters.js';
 import { isLowStockConsumible } from '../../utils/stock.js';
 
 export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, setView }) {
@@ -22,7 +22,10 @@ export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, s
     const nextStay = estadias
       .filter(e => e.property === p.id && e.checkOut >= today)
       .sort((a, b) => a.checkIn.localeCompare(b.checkIn))[0];
-    return { id: p.id, name: p.name, lowStock: propLowStock, pendingTasks: propPendingTasks, nextStay };
+    const ingresos = estadias
+      .filter(e => e.property === p.id && e.monto)
+      .reduce((sum, e) => sum + Number(e.monto), 0);
+    return { id: p.id, name: p.name, lowStock: propLowStock, pendingTasks: propPendingTasks, nextStay, ingresos };
   });
 
   return (
@@ -57,14 +60,15 @@ export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, s
         <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--line)', fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)' }}>
           Alertas por propiedad
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 140px 1fr', padding: '10px 18px', fontSize: 10.5, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--line)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 140px 130px 1fr', padding: '10px 18px', fontSize: 10.5, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--line)' }}>
           <div>Propiedad</div>
           <div>Stock bajo</div>
           <div>Tareas pendientes</div>
+          <div>Ingresos registrados</div>
           <div>Próxima estadía</div>
         </div>
         {perProperty.map(p => (
-          <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 140px 140px 1fr', padding: '12px 18px', alignItems: 'center', fontSize: 13, borderBottom: '1px solid var(--line)' }}>
+          <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 140px 130px 1fr', padding: '12px 18px', alignItems: 'center', fontSize: 13, borderBottom: '1px solid var(--line)' }}>
             <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
               <Icon name="home" size={14} color="var(--ink-3)" />
               {p.name}
@@ -78,6 +82,11 @@ export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, s
               onClick={() => setView('airbnb_kanban')}
               style={{ cursor: 'pointer', color: p.pendingTasks > 0 ? 'var(--jat)' : 'var(--ink-3)', fontWeight: p.pendingTasks > 0 ? 600 : 400 }}>
               {p.pendingTasks > 0 ? `${p.pendingTasks} pendientes` : '— sin tareas'}
+            </div>
+            <div
+              onClick={() => setView('airbnb_calendario')}
+              style={{ cursor: 'pointer', fontFamily: 'var(--font-mono)', color: p.ingresos > 0 ? 'var(--signal-pos)' : 'var(--ink-3)', fontWeight: p.ingresos > 0 ? 600 : 400 }}>
+              {p.ingresos > 0 ? fmtCLP(p.ingresos, { compact: true, sign: false }) : '—'}
             </div>
             <div style={{ color: 'var(--ink-2)', fontSize: 12.5 }}>
               {p.nextStay
