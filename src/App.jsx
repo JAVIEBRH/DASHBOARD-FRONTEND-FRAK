@@ -175,10 +175,11 @@ export default function App() {
               )}
               {view === 'airbnb_kanban' && (
                 <AirbnbKanban
-                  tasks={data.kanbanTasks}
+                  tasks={data.kanbanTasks} limpiezas={data.limpiezas}
                   stockProperties={data.stockProperties} addProperty={addProperty}
                   propertyId={activePropertyId} setPropertyId={setActivePropertyId}
                   addKanbanTask={addKanbanTask} editKanbanTask={editKanbanTask} deleteKanbanTask={deleteKanbanTask}
+                  editLimpieza={editLimpieza} deleteLimpieza={deleteLimpieza}
                   showToast={showToast}
                 />
               )}

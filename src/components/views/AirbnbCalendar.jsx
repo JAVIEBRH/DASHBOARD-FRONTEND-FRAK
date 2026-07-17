@@ -156,8 +156,13 @@ export function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBar
                 {day && limpiezasByDay[day]?.map(l => (
                   <div key={l.id}
                     onClick={e => { e.stopPropagation(); onCleaningClick(l); }}
-                    title={l.notes || 'Limpieza'}
-                    style={{ marginTop: 5, display: 'inline-flex', alignItems: 'center', gap: 3, background: 'var(--brass-soft)', color: 'var(--brass-2)', borderRadius: 6, padding: '2px 6px', fontSize: 10 }}>
+                    title={(l.notes || 'Limpieza') + (l.done ? ' (hecha)' : '')}
+                    style={{
+                      marginTop: 5, display: 'inline-flex', alignItems: 'center', gap: 3, borderRadius: 6, padding: '2px 6px', fontSize: 10,
+                      background: l.done ? 'var(--surface-2)' : 'var(--brass-soft)',
+                      color: l.done ? 'var(--ink-4)' : 'var(--brass-2)',
+                      textDecoration: l.done ? 'line-through' : 'none',
+                    }}>
                     <Icon name="sparkle" size={9} /> limpieza
                   </div>
                 ))}
