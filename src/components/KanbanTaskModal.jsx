@@ -21,7 +21,7 @@ export function KanbanTaskModal({ open, item, onSave, onDelete, onClose }) {
 
   const handleSubmit = () => {
     if (!form.title.trim()) { setError('El título es requerido'); return; }
-    onSave({ title: form.title.trim(), notes: form.notes.trim(), status: item?.status ?? 'todo', property: 'pac' });
+    onSave({ title: form.title.trim(), notes: form.notes.trim(), status: item?.status ?? 'todo' });
   };
 
   const isEdit = !!item;

@@ -37,7 +37,7 @@ export function LimpiezaModal({ open, item, defaultDate, onSave, onDelete, onClo
   const handleSubmit = () => {
     const e = validate(form);
     if (Object.keys(e).length) { setErrors(e); return; }
-    onSave({ property: 'pac', date: form.date, notes: form.notes.trim(), done: item?.done ?? false });
+    onSave({ date: form.date, notes: form.notes.trim(), done: item?.done ?? false });
   };
 
   const isEdit = !!item;

@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react';
 import { Icon } from '../ui/Icon.jsx';
 import { EstadiaModal } from '../EstadiaModal.jsx';
 import { LimpiezaModal } from '../LimpiezaModal.jsx';
+import { PropertySelector } from './PropertySelector.jsx';
+import { AddPropertyModal } from '../AddPropertyModal.jsx';
 import { fmtCLP } from '../../utils/formatters.js';
 
 const MONTH_ABBR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -160,9 +162,15 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
   );
 }
 
-export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder, monthLabels, addEstadia, editEstadia, deleteEstadia, addLimpieza, editLimpieza, deleteLimpieza, showToast }) {
+export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProperty, year, period, monthsOrder, monthLabels, addEstadia, editEstadia, deleteEstadia, addLimpieza, editLimpieza, deleteLimpieza, showToast }) {
+  const [propertyId, setPropertyId] = useState(null);
+  const [addPropertyOpen, setAddPropertyOpen] = useState(false);
   const [estadiaModal, setEstadiaModal] = useState(null); // { item, defaultDate } | null
   const [limpiezaModal, setLimpiezaModal] = useState(null);
+
+  const property = stockProperties.find(p => p.id === propertyId) ?? null;
+  const propertyEstadias = property ? estadias.filter(e => e.property === propertyId) : [];
+  const propertyLimpiezas = property ? limpiezas.filter(l => l.property === propertyId) : [];
 
   const yearNum = Number(year);
   const monthsToShow = period === 'all'
@@ -172,15 +180,41 @@ export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder,
   const openNewEstadia = () => setEstadiaModal({ item: null, defaultDate: null });
   const openNewLimpieza = () => setLimpiezaModal({ item: null, defaultDate: null });
 
+  const handleAddProperty = async (data) => {
+    const id = await addProperty(data);
+    setAddPropertyOpen(false);
+    showToast?.('Propiedad creada');
+    setPropertyId(id);
+  };
+
+  if (!property) {
+    return (
+      <>
+        <PropertySelector
+          properties={stockProperties}
+          onSelect={setPropertyId}
+          onAddProperty={() => setAddPropertyOpen(true)}
+          eyebrow="Airbnb"
+          title={<>Calendario <em>por propiedad</em>.</>}
+          subtitle="Elige una propiedad para ver sus estadías y limpiezas."
+        />
+        <AddPropertyModal open={addPropertyOpen} onSave={handleAddProperty} onClose={() => setAddPropertyOpen(false)} />
+      </>
+    );
+  }
+
   return (
     <div>
       <div className="v-section-head">
         <div>
-          <div className="v-eyebrow">Airbnb</div>
+          <div className="v-eyebrow">Airbnb · {property.name}</div>
           <h1 className="v-section-title">Calendario <em>de reservas</em>.</h1>
           <p className="v-section-sub">Estadías y limpiezas de {year}{period !== 'all' ? ` · ${monthLabels?.[period] ?? period}` : ' · año completo'}.</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <button className="v-btn" onClick={() => setPropertyId(null)}>
+            <Icon name="chevron_right" size={12} style={{ transform: 'rotate(180deg)' }} /> Otras propiedades
+          </button>
           <button className="v-btn ghost" onClick={openNewLimpieza}>
             <Icon name="sparkle" size={13} /> Agendar limpieza
           </button>
@@ -196,7 +230,7 @@ export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder,
           return (
             <MonthBlock key={m}
               year={yearNum} monthIndex={monthIdx} label={monthLabels?.[m] ?? m}
-              estadias={estadias} limpiezas={limpiezas}
+              estadias={propertyEstadias} limpiezas={propertyLimpiezas}
               onBarClick={(estadia) => setEstadiaModal({ item: estadia, defaultDate: null })}
               onDayClick={(dateStr) => setEstadiaModal({ item: null, defaultDate: dateStr })}
               onCleaningClick={(limpieza) => setLimpiezaModal({ item: limpieza, defaultDate: null })}
@@ -211,6 +245,7 @@ export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder,
         defaultDate={estadiaModal?.defaultDate}
         onClose={() => setEstadiaModal(null)}
         onSave={(data) => {
+          data = { ...data, property: propertyId };
           if (estadiaModal?.item) {
             editEstadia(estadiaModal.item.id, data);
             showToast?.('Estadía actualizada');
@@ -231,6 +266,7 @@ export function AirbnbCalendar({ estadias, limpiezas, year, period, monthsOrder,
         defaultDate={limpiezaModal?.defaultDate}
         onClose={() => setLimpiezaModal(null)}
         onSave={(data) => {
+          data = { ...data, property: propertyId };
           if (limpiezaModal?.item) {
             editLimpieza(limpiezaModal.item.id, data);
             showToast?.('Limpieza actualizada');

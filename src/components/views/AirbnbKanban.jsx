@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { Icon } from '../ui/Icon.jsx';
 import { KanbanTaskModal } from '../KanbanTaskModal.jsx';
+import { PropertySelector } from './PropertySelector.jsx';
+import { AddPropertyModal } from '../AddPropertyModal.jsx';
 
 const COLUMNS = [
   { status: 'todo',  label: 'Por hacer' },
@@ -9,8 +11,13 @@ const COLUMNS = [
   { status: 'done',  label: 'Hecho' },
 ];
 
-export function AirbnbKanban({ tasks, addKanbanTask, editKanbanTask, deleteKanbanTask, showToast }) {
+export function AirbnbKanban({ tasks, stockProperties, addProperty, addKanbanTask, editKanbanTask, deleteKanbanTask, showToast }) {
+  const [propertyId, setPropertyId] = useState(null);
+  const [addPropertyOpen, setAddPropertyOpen] = useState(false);
   const [modalTask, setModalTask] = useState(undefined); // undefined = closed, null = new, obj = edit
+
+  const property = stockProperties.find(p => p.id === propertyId) ?? null;
+  const propertyTasks = property ? tasks.filter(t => t.property === propertyId) : [];
 
   const move = (task, dir) => {
     const idx = COLUMNS.findIndex(c => c.status === task.status);
@@ -18,22 +25,50 @@ export function AirbnbKanban({ tasks, addKanbanTask, editKanbanTask, deleteKanba
     if (next) editKanbanTask(task.id, { status: next.status });
   };
 
+  const handleAddProperty = async (data) => {
+    const id = await addProperty(data);
+    setAddPropertyOpen(false);
+    showToast?.('Propiedad creada');
+    setPropertyId(id);
+  };
+
+  if (!property) {
+    return (
+      <>
+        <PropertySelector
+          properties={stockProperties}
+          onSelect={setPropertyId}
+          onAddProperty={() => setAddPropertyOpen(true)}
+          eyebrow="Airbnb"
+          title={<>Kanban <em>por propiedad</em>.</>}
+          subtitle="Elige una propiedad para ver su tablero de tareas."
+        />
+        <AddPropertyModal open={addPropertyOpen} onSave={handleAddProperty} onClose={() => setAddPropertyOpen(false)} />
+      </>
+    );
+  }
+
   return (
     <div>
       <div className="v-section-head">
         <div>
-          <div className="v-eyebrow">Airbnb</div>
+          <div className="v-eyebrow">Airbnb · {property.name}</div>
           <h1 className="v-section-title">Tablero de <em>tareas</em>.</h1>
-          <p className="v-section-sub">{tasks.length} tareas registradas.</p>
+          <p className="v-section-sub">{propertyTasks.length} tareas registradas.</p>
         </div>
-        <button className="v-btn primary" onClick={() => setModalTask(null)}>
-          <Icon name="plus" size={13} /> Nueva tarea
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="v-btn" onClick={() => setPropertyId(null)}>
+            <Icon name="chevron_right" size={12} style={{ transform: 'rotate(180deg)' }} /> Otras propiedades
+          </button>
+          <button className="v-btn primary" onClick={() => setModalTask(null)}>
+            <Icon name="plus" size={13} /> Nueva tarea
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         {COLUMNS.map((col, colIdx) => {
-          const colTasks = tasks.filter(t => t.status === col.status);
+          const colTasks = propertyTasks.filter(t => t.status === col.status);
           return (
             <div key={col.status} className="v-card" style={{ padding: 14, minHeight: 300 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -75,6 +110,7 @@ export function AirbnbKanban({ tasks, addKanbanTask, editKanbanTask, deleteKanba
         item={modalTask ?? null}
         onClose={() => setModalTask(undefined)}
         onSave={(data) => {
+          data = { ...data, property: propertyId };
           if (modalTask) {
             editKanbanTask(modalTask.id, data);
             showToast?.('Tarea actualizada');

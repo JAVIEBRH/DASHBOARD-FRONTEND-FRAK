@@ -8,6 +8,7 @@ import { useFurniture } from './hooks/useFurniture.js';
 import { useEstadias } from './hooks/useEstadias.js';
 import { useLimpiezas } from './hooks/useLimpiezas.js';
 import { useKanbanTasks } from './hooks/useKanbanTasks.js';
+import { useProperties } from './hooks/useProperties.js';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { Topbar } from './components/layout/Topbar.jsx';
 import { ToastContainer } from './components/ui/Toast.jsx';
@@ -57,6 +58,7 @@ export default function App() {
   const { addEstadia, editEstadia, deleteEstadia } = useEstadias(data, setData);
   const { addLimpieza, editLimpieza, deleteLimpieza } = useLimpiezas(data, setData);
   const { addKanbanTask, editKanbanTask, deleteKanbanTask } = useKanbanTasks(data, setData);
+  const { addProperty } = useProperties(setData);
 
   const toastedLowStockRef = useRef(false);
   useEffect(() => {
@@ -153,6 +155,7 @@ export default function App() {
               {view === 'airbnb_calendario' && (
                 <AirbnbCalendar
                   estadias={data.estadias} limpiezas={data.limpiezas}
+                  stockProperties={data.stockProperties} addProperty={addProperty}
                   year={year} period={period} monthsOrder={monthsOrder} monthLabels={data.monthLabels}
                   addEstadia={addEstadia} editEstadia={editEstadia} deleteEstadia={deleteEstadia}
                   addLimpieza={addLimpieza} editLimpieza={editLimpieza} deleteLimpieza={deleteLimpieza}
@@ -162,6 +165,7 @@ export default function App() {
               {view === 'airbnb_kanban' && (
                 <AirbnbKanban
                   tasks={data.kanbanTasks}
+                  stockProperties={data.stockProperties} addProperty={addProperty}
                   addKanbanTask={addKanbanTask} editKanbanTask={editKanbanTask} deleteKanbanTask={deleteKanbanTask}
                   showToast={showToast}
                 />

@@ -45,7 +45,6 @@ export function EstadiaModal({ open, item, defaultDate, onSave, onDelete, onClos
     const e = validate(form);
     if (Object.keys(e).length) { setErrors(e); return; }
     onSave({
-      property: 'pac',
       guestName: form.guestName.trim(),
       checkIn: form.checkIn,
       checkOut: form.checkOut,

@@ -1,14 +1,19 @@
 // src/components/views/PropertySelector.jsx
 import { Icon } from '../ui/Icon.jsx';
 
-export function PropertySelector({ properties, onSelect, onAddProperty }) {
+export function PropertySelector({
+  properties, onSelect, onAddProperty,
+  eyebrow = 'Operaciones',
+  title = <>Stock <em>por propiedad</em>.</>,
+  subtitle = 'Elige una propiedad para ver su inventario de consumibles y activos fijos.',
+}) {
   return (
     <div>
       <div className="v-section-head">
         <div>
-          <div className="v-eyebrow">Operaciones</div>
-          <h1 className="v-section-title">Stock <em>por propiedad</em>.</h1>
-          <p className="v-section-sub">Elige una propiedad para ver su inventario de consumibles y activos fijos.</p>
+          <div className="v-eyebrow">{eyebrow}</div>
+          <h1 className="v-section-title">{title}</h1>
+          <p className="v-section-sub">{subtitle}</p>
         </div>
       </div>
 
