@@ -3,7 +3,7 @@ import { Icon } from '../ui/Icon.jsx';
 
 export function PropertySelector({
   properties, onSelect, onAddProperty,
-  eyebrow = 'Operaciones',
+  eyebrow = 'Airbnb',
   title = <>Stock <em>por propiedad</em>.</>,
   subtitle = 'Elige una propiedad para ver su inventario de consumibles y activos fijos.',
 }) {

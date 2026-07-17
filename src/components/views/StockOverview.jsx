@@ -14,7 +14,7 @@ export function StockOverview({ propertyName, zones, stock, furniture, onSelectZ
     <div>
       <div className="v-section-head">
         <div>
-          <div className="v-eyebrow">Operaciones · {propertyName}</div>
+          <div className="v-eyebrow">Airbnb · {propertyName}</div>
           <h1 className="v-section-title">Inventario <em>por zona</em>.</h1>
           <p className="v-section-sub">Consumibles y activos fijos, agrupados por dónde viven.</p>
         </div>

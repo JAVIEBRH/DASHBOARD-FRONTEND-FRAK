@@ -21,7 +21,7 @@ export function ZoneDetail({ zone, zones, isStockZone, items, onBack, onSelectZo
     <div>
       <div className="v-section-head">
         <div>
-          <div className="v-eyebrow">Operaciones · {zoneLabel(zones, zone)}</div>
+          <div className="v-eyebrow">Airbnb · {zoneLabel(zones, zone)}</div>
           <h1 className="v-section-title">Inventario <em>{zoneLabel(zones, zone).toLowerCase()}</em>.</h1>
         </div>
         <button className="v-btn" onClick={onBack}>

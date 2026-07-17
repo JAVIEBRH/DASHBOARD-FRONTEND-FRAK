@@ -25,7 +25,7 @@ import { Stock } from './components/views/Stock.jsx';
 import { AirbnbResumen } from './components/views/AirbnbResumen.jsx';
 import { AirbnbCalendar } from './components/views/AirbnbCalendar.jsx';
 import { AirbnbKanban } from './components/views/AirbnbKanban.jsx';
-import { isLowStockConsumible } from './utils/stock.js';
+import { stockStatus } from './utils/stock.js';
 
 const VIEW_TITLE = {
   overview: 'Resumen',
@@ -64,9 +64,13 @@ export default function App() {
   useEffect(() => {
     if (!loading && data && !toastedLowStockRef.current) {
       toastedLowStockRef.current = true;
-      const n = data.stock.filter(isLowStockConsumible).length;
-      if (n > 0) {
-        showToast(`Tienes ${n} producto${n === 1 ? '' : 's'} con stock bajo — click para ver`, 'error', {
+      const agotados = data.stock.filter(s => stockStatus(s, true) === 'agotado').length;
+      const bajos = data.stock.filter(s => stockStatus(s, true) === 'bajo').length;
+      if (agotados > 0 || bajos > 0) {
+        const parts = [];
+        if (agotados > 0) parts.push(`${agotados} agotado${agotados === 1 ? '' : 's'}`);
+        if (bajos > 0) parts.push(`${bajos} por agotar`);
+        showToast(`Stock: ${parts.join(' · ')} — click para ver`, 'error', {
           duration: 8000,
           onClick: () => setView('stock'),
         });
@@ -110,13 +114,17 @@ export default function App() {
   };
 
   const viewProps = { filteredTx, categoryMeta: data?.categoryMeta, onEdit: handleEdit };
-  const stockAlertCount = data ? data.stock.filter(isLowStockConsumible).length : 0;
+  const agotadosCount = data ? data.stock.filter(s => stockStatus(s, true) === 'agotado').length : 0;
+  const bajosCount = data ? data.stock.filter(s => stockStatus(s, true) === 'bajo').length : 0;
+  const stockAlertCount = agotadosCount + bajosCount;
+  const stockBadgeColor = agotadosCount > 0 ? 'var(--signal-neg)' : 'var(--jat)';
 
   return (
     <div className="vault-app">
       <Sidebar
         view={view} setView={setView} year={year}
         badgeCounts={{ stock: stockAlertCount }}
+        badgeColors={{ stock: stockBadgeColor }}
         expandedGroup={expandedGroup} onToggleGroup={handleToggleGroup}
       />
       <main className="v-main">

@@ -3,7 +3,7 @@ import { NAV_GROUPS } from '../../utils/categories.js';
 import { NavItem } from './NavItem.jsx';
 import { Icon } from '../ui/Icon.jsx';
 
-export function Sidebar({ view, setView, year, badgeCounts = {}, expandedGroup, onToggleGroup }) {
+export function Sidebar({ view, setView, year, badgeCounts = {}, badgeColors = {}, expandedGroup, onToggleGroup }) {
   return (
     <aside className="v-sidebar">
       <div className="v-brand">
@@ -21,7 +21,7 @@ export function Sidebar({ view, setView, year, badgeCounts = {}, expandedGroup, 
             {group.items.map(item => {
               if (!item.expandable) {
                 return (
-                  <NavItem key={item.id} item={item} active={view === item.id} onClick={setView} badgeCount={badgeCounts[item.id]} />
+                  <NavItem key={item.id} item={item} active={view === item.id} onClick={setView} badgeCount={badgeCounts[item.id]} badgeColor={badgeColors[item.id]} />
                 );
               }
 
@@ -41,7 +41,7 @@ export function Sidebar({ view, setView, year, badgeCounts = {}, expandedGroup, 
                     }
                   />
                   {isExpanded && item.children.map(child => (
-                    <NavItem key={child.id} item={child} active={view === child.id} onClick={setView} badgeCount={badgeCounts[child.id]} sub />
+                    <NavItem key={child.id} item={child} active={view === child.id} onClick={setView} badgeCount={badgeCounts[child.id]} badgeColor={badgeColors[child.id]} sub />
                   ))}
                 </div>
               );
