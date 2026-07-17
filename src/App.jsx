@@ -150,7 +150,7 @@ export default function App() {
                 />
               )}
               {view === 'airbnb_resumen' && (
-                <AirbnbResumen estadias={data.estadias} stock={data.stock} kanbanTasks={data.kanbanTasks} setView={setView} />
+                <AirbnbResumen estadias={data.estadias} stock={data.stock} kanbanTasks={data.kanbanTasks} stockProperties={data.stockProperties} setView={setView} />
               )}
               {view === 'airbnb_calendario' && (
                 <AirbnbCalendar
