@@ -2,8 +2,11 @@
 import { Icon } from '../ui/Icon.jsx';
 import { fmtDate, fmtCLP } from '../../utils/formatters.js';
 import { isLowStockConsumible } from '../../utils/stock.js';
+import { MonthBlock } from './AirbnbCalendar.jsx';
 
-export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, setView }) {
+const MONTH_NAMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+export function AirbnbResumen({ estadias, limpiezas, stock, kanbanTasks, stockProperties, setView }) {
   const today = new Date().toISOString().slice(0, 10);
   const propertyName = (id) => stockProperties.find(p => p.id === id)?.name ?? id;
 
@@ -27,6 +30,12 @@ export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, s
       .reduce((sum, e) => sum + Number(e.monto), 0);
     return { id: p.id, name: p.name, lowStock: propLowStock, pendingTasks: propPendingTasks, nextStay, ingresos };
   });
+
+  const totalIngresos = perProperty.reduce((sum, p) => sum + p.ingresos, 0);
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonthIndex = now.getMonth();
 
   return (
     <div>
@@ -53,6 +62,13 @@ export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, s
           <div className="v-kpi-label">Tareas pendientes</div>
           <div className="v-kpi-value">{pendingTasks}</div>
           <div className="v-kpi-delta" style={{ color: 'var(--ink-2)' }}>ver kanban →</div>
+        </div>
+        <div className="v-card">
+          <div className="v-kpi-label">Ingresos totales</div>
+          <div className="v-kpi-value" style={{ color: totalIngresos > 0 ? 'var(--signal-pos)' : undefined }}>
+            {totalIngresos > 0 ? fmtCLP(totalIngresos, { compact: true, sign: false }) : '—'}
+          </div>
+          <div className="v-kpi-delta" style={{ color: 'var(--ink-2)' }}>ambas propiedades</div>
         </div>
       </div>
 
@@ -98,6 +114,32 @@ export function AirbnbResumen({ estadias, stock, kanbanTasks, stockProperties, s
         {perProperty.length === 0 && (
           <div style={{ padding: '18px', color: 'var(--ink-3)', fontSize: 13 }}>No hay propiedades registradas todavía.</div>
         )}
+        {perProperty.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 140px 130px 1fr', padding: '12px 18px', alignItems: 'center', fontSize: 13, background: 'var(--surface-2)' }}>
+            <div style={{ fontWeight: 600 }}>Total</div>
+            <div />
+            <div />
+            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: totalIngresos > 0 ? 'var(--signal-pos)' : 'var(--ink-3)' }}>
+              {totalIngresos > 0 ? fmtCLP(totalIngresos, { compact: true, sign: false }) : '—'}
+            </div>
+            <div />
+          </div>
+        )}
+      </div>
+
+      <div className="v-card" style={{ padding: 24, marginBottom: 20 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', marginBottom: 14 }}>
+          Calendario general · todas las propiedades
+        </div>
+        <MonthBlock
+          year={currentYear} monthIndex={currentMonthIndex} label={MONTH_NAMES[currentMonthIndex]}
+          estadias={estadias} limpiezas={limpiezas}
+          onBarClick={() => setView('airbnb_calendario')}
+          onDayClick={() => setView('airbnb_calendario')}
+          onCleaningClick={() => setView('airbnb_calendario')}
+          onSuggestCleaning={() => setView('airbnb_calendario')}
+          propertyTag={(estadia) => propertyName(estadia.property)}
+        />
       </div>
 
       <div className="v-card" style={{ padding: 18 }}>

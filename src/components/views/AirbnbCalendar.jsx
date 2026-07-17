@@ -52,7 +52,7 @@ function monthBarSegments(weeks, daysInMonth, clippedStart, clippedEnd) {
   return segments;
 }
 
-function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, onDayClick, onCleaningClick, onSuggestCleaning }) {
+export function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, onDayClick, onCleaningClick, onSuggestCleaning, propertyTag }) {
   const { weeks, daysInMonth } = useMemo(() => buildMonthGrid(year, monthIndex), [year, monthIndex]);
   const monthStart = `${year}-${pad(monthIndex + 1)}-01`;
   const monthEnd = `${year}-${pad(monthIndex + 1)}-${pad(daysInMonth)}`;
@@ -66,14 +66,37 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
   }, [estadias, monthStart, monthEnd]);
 
   const stayBars = useMemo(() => {
-    return estadias
+    const segments = estadias
       .filter(e => e.checkIn <= monthEnd && e.checkOut >= monthStart)
       .flatMap(e => {
         const startDay = e.checkIn < monthStart ? 1 : Number(e.checkIn.slice(8, 10));
         const endDay = e.checkOut > monthEnd ? daysInMonth : Number(e.checkOut.slice(8, 10));
         return monthBarSegments(weeks, daysInMonth, startDay, endDay).map(seg => ({ ...seg, estadia: e }));
       });
+
+    // Assign each segment a lane so overlapping stays (e.g. two properties
+    // both occupied the same day) stack vertically instead of colliding.
+    const byRow = {};
+    segments.forEach(seg => { (byRow[seg.rowIdx] ??= []).push(seg); });
+    Object.values(byRow).forEach(rowSegs => {
+      rowSegs.sort((a, b) => a.colStart - b.colStart);
+      const laneEnds = [];
+      rowSegs.forEach(seg => {
+        const colEnd = seg.colStart + seg.colSpan - 1;
+        let lane = laneEnds.findIndex(end => end < seg.colStart);
+        if (lane === -1) { lane = laneEnds.length; laneEnds.push(colEnd); }
+        else laneEnds[lane] = colEnd;
+        seg.lane = lane;
+      });
+    });
+    return segments;
   }, [estadias, weeks, daysInMonth, monthStart, monthEnd]);
+
+  const lanesByRow = useMemo(() => {
+    const map = {};
+    stayBars.forEach(seg => { map[seg.rowIdx] = Math.max(map[seg.rowIdx] ?? 1, seg.lane + 1); });
+    return map;
+  }, [stayBars]);
 
   const limpiezasByDay = useMemo(() => {
     const map = {};
@@ -100,7 +123,9 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
           }}>{d}</div>
         ))}
       </div>
-      {weeks.map((week, rowIdx) => (
+      {weeks.map((week, rowIdx) => {
+        const rowMinHeight = Math.max(58, 38 + (lanesByRow[rowIdx] ?? 1) * 28 + 6);
+        return (
         <div key={rowIdx} style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
           {week.map((day, colIdx) => {
             const dateStr = day ? `${year}-${pad(monthIndex + 1)}-${pad(day)}` : null;
@@ -109,7 +134,7 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
               <div key={colIdx}
                 onClick={() => day && onDayClick(dateStr)}
                 style={{
-                  minHeight: 58, padding: '6px 8px',
+                  minHeight: rowMinHeight, padding: '6px 8px',
                   background: day ? 'var(--surface)' : 'var(--bg-2)',
                   cursor: day ? 'pointer' : 'default',
                   borderRight: '1px solid var(--line-2)', borderBottom: '1px solid var(--line-2)',
@@ -158,7 +183,7 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
                 onClick={e => { e.stopPropagation(); onBarClick(b.estadia); }}
                 title={tooltip}
                 style={{
-                  position: 'absolute', top: 38, height: 24,
+                  position: 'absolute', top: 38 + b.lane * 28, height: 24,
                   left: `calc(${(b.colStart / 7) * 100}% + 4px)`,
                   width: `calc(${(b.colSpan / 7) * 100}% - 8px)`,
                   background: colorFor(b.estadia.guestName), color: '#fff',
@@ -173,11 +198,13 @@ function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBarClick, 
                   justifyContent: 'center', fontSize: 10, fontWeight: 700,
                 }}>{b.estadia.guestName.trim().charAt(0).toUpperCase()}</span>
                 {b.estadia.guestName}
+                {propertyTag && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {propertyTag(b.estadia)}</span>}
               </div>
             );
           })}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
