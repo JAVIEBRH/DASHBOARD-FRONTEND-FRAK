@@ -8,6 +8,11 @@ export function zoneLabel(zones, zoneId) {
 // consumibles. Un activo fijo (mesa, sofá) no "se agota con el uso", así que no tiene umbral:
 // solo puede estar presente o faltante.
 export function isLowStockConsumible(item) {
+  // Reusable items (sponges, cloths) rotate constantly between "new" and
+  // "in use" — pctEnUso there tracks wear on whichever one is currently
+  // active, not overall supply, so it must never drive the alert. Supply
+  // for those is qtyBodega/umbralUnidades alone, same as a fixed asset.
+  if (item.reusable) return item.qtyBodega <= item.umbralUnidades;
   return item.qtyBodega <= item.umbralUnidades || (item.pctEnUso != null && item.pctEnUso <= 15);
 }
 

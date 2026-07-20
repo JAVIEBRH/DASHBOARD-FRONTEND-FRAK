@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Icon } from './ui/Icon.jsx';
 import { zoneLabel } from '../utils/stock.js';
 
-const EMPTY = { category: '', name: '', qty: '', unit: '', pctEnUso: '', umbral: '1' };
+const EMPTY = { category: '', name: '', qty: '', unit: '', pctEnUso: '', umbral: '1', reusable: false };
 
 function validate(f, isStockZone) {
   const e = {};
@@ -35,6 +35,7 @@ export function StockModal({ open, item, isStockZone, zone, zones, onSave, onDel
           unit: item.unit ?? '',
           pctEnUso: item.pctEnUso == null ? '' : String(item.pctEnUso),
           umbral: String(item.umbralUnidades),
+          reusable: item.reusable ?? false,
         });
       } else {
         setForm(EMPTY);
@@ -59,7 +60,7 @@ export function StockModal({ open, item, isStockZone, zone, zones, onSave, onDel
       name: form.name.trim(),
     };
     const payload = isStockZone
-      ? { ...base, property: 'pac', unit: form.unit.trim(), qtyBodega: Number(form.qty), pctEnUso: form.pctEnUso === '' ? null : Number(form.pctEnUso), umbralUnidades: Number(form.umbral) }
+      ? { ...base, unit: form.unit.trim(), qtyBodega: Number(form.qty), pctEnUso: form.pctEnUso === '' ? null : Number(form.pctEnUso), umbralUnidades: Number(form.umbral), reusable: form.reusable }
       : { ...base, qty: Number(form.qty) };
     onSave(payload);
   };
@@ -140,6 +141,16 @@ export function StockModal({ open, item, isStockZone, zone, zones, onSave, onDel
               {errors.pctEnUso && <div className="v-form-error">{errors.pctEnUso}</div>}
             </div>
           </div>
+        )}
+
+        {isStockZone && (
+          <label className="v-form-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <input type="checkbox" checked={form.reusable} onChange={e => set('reusable', e.target.checked)} />
+            <span>
+              <div className="v-form-label" style={{ marginBottom: 2 }}>Ítem reutilizable (esponja, paño…)</div>
+              <div style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>El % en uso no afectará la alerta de bajo stock — solo la cantidad en bodega.</div>
+            </span>
+          </label>
         )}
 
         {confirmDel ? (
