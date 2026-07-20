@@ -2,7 +2,7 @@
 import { useState, useMemo, useEffect } from 'react';
 
 export function useFilter(transactions, monthsOrder2025, monthsOrder2026) {
-  const [year, setYear] = useState('2025');
+  const [year, setYear] = useState(String(new Date().getFullYear()));
   const [period, setPeriod] = useState('all');
 
   useEffect(() => { setPeriod('all'); }, [year]);
