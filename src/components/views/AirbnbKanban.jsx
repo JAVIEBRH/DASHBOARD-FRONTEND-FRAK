@@ -107,26 +107,37 @@ export function AirbnbKanban({
                   <div key={item.kind + item.id} className="v-card" style={{
                     padding: 10, background: 'var(--surface-2)',
                     borderColor: item.kind === 'limpieza' ? 'var(--brass-2)' : undefined,
+                    animation: 'v-row-in 0.25s cubic-bezier(.2,.8,.2,1) both',
                   }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '0.06em', color: item.kind === 'limpieza' ? 'var(--brass-2)' : 'var(--ink-4)', marginBottom: 3 }}>
+                      {item.kind === 'limpieza' ? 'Limpieza' : 'Tarea'}
+                    </div>
                     <div onClick={() => openItem(item)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, marginBottom: item.notes ? 4 : 0 }}>
                       {item.kind === 'limpieza' && <Icon name="sparkle" size={12} color="var(--brass-2)" />}
                       {item.title}
                     </div>
                     {item.notes && <div style={{ fontSize: 11.5, color: 'var(--ink-3)', marginBottom: 8 }}>{item.notes}</div>}
                     <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                      <button className="v-btn ghost" disabled={colIdx === 0} style={{ padding: '3px 7px', fontSize: 11, opacity: colIdx === 0 ? 0.3 : 1 }}
+                      <button className="v-btn" disabled={colIdx === 0}
+                        title={colIdx > 0 ? `Mover a "${COLUMNS[colIdx - 1].label}"` : undefined}
+                        style={{ padding: '5px 9px', fontSize: 11, opacity: colIdx === 0 ? 0.3 : 1 }}
                         onClick={() => move(item, -1)}>
-                        <Icon name="chevron_right" size={11} style={{ transform: 'rotate(180deg)' }} />
+                        <Icon name="chevron_right" size={13} style={{ transform: 'rotate(180deg)' }} />
                       </button>
-                      <button className="v-btn ghost" disabled={colIdx === COLUMNS.length - 1} style={{ padding: '3px 7px', fontSize: 11, opacity: colIdx === COLUMNS.length - 1 ? 0.3 : 1 }}
+                      <button className="v-btn" disabled={colIdx === COLUMNS.length - 1}
+                        title={colIdx < COLUMNS.length - 1 ? `Mover a "${COLUMNS[colIdx + 1].label}"` : undefined}
+                        style={{ padding: '5px 9px', fontSize: 11, opacity: colIdx === COLUMNS.length - 1 ? 0.3 : 1 }}
                         onClick={() => move(item, 1)}>
-                        <Icon name="chevron_right" size={11} />
+                        <Icon name="chevron_right" size={13} />
                       </button>
                     </div>
                   </div>
                 ))}
                 {colItems.length === 0 && (
-                  <div style={{ fontSize: 12, color: 'var(--ink-4)', padding: '12px 0', textAlign: 'center' }}>Sin tareas</div>
+                  <div style={{
+                    fontSize: 12, color: 'var(--ink-4)', padding: '20px 0', textAlign: 'center',
+                    border: '1px dashed var(--line-2)', borderRadius: 8,
+                  }}>Sin tareas</div>
                 )}
               </div>
             </div>
