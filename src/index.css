@@ -377,7 +377,15 @@ button { font-family: inherit; }
   overflow: auto;
   padding: 32px 40px 80px;
   background: var(--bg);
-  animation: v-content-in 0.35s cubic-bezier(.2,.8,.2,1) both;
+  /* No `both`/`forwards` fill-mode: those persist the final keyframe's
+     `transform` forever after the animation ends, which makes .v-content
+     a containing block for every `position: fixed` descendant (every
+     modal in the app) — so focusing an input inside a modal made the
+     browser "scroll into view" .v-content itself instead of the real
+     viewport, silently resetting whatever list the user had scrolled.
+     Default fill-mode releases the transform once the 0.35s mount
+     animation finishes, same visual effect, no lingering side effect. */
+  animation: v-content-in 0.35s cubic-bezier(.2,.8,.2,1);
 }
 
 /* ── Section heads ── */
