@@ -141,7 +141,7 @@ function KpiHoverList({ items, emptyLabel, children }) {
                   <div style={{ color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
                   <div style={{ color: 'var(--ink-3)', fontSize: 11 }}>
                     {item.qtyBodega} en bodega
-                    {item.pctEnUso != null ? ` · ${item.pctEnUso}% en uso` : ''}
+                    {item.enUso?.length > 0 ? ` · ${item.enUso.map(u => `${u.pct}%`).join(', ')} en uso` : ''}
                   </div>
                 </div>
               ))}

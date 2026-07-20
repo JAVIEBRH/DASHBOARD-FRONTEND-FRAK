@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Icon } from './ui/Icon.jsx';
 import { zoneLabel } from '../utils/stock.js';
 
-const EMPTY = { category: '', name: '', qty: '', unit: '', pctEnUso: '', umbral: '1', reusable: false };
+const EMPTY = { category: '', name: '', qty: '', unit: '', umbral: '1', enUso: [] };
 
 function validate(f, isStockZone) {
   const e = {};
@@ -14,8 +14,10 @@ function validate(f, isStockZone) {
   if (isStockZone) {
     if (f.umbral === '')                                     e.umbral = 'El umbral es requerido';
     else if (isNaN(Number(f.umbral)) || Number(f.umbral) < 0) e.umbral = 'Ingresa un número válido';
-    if (f.pctEnUso !== '' && (isNaN(Number(f.pctEnUso)) || Number(f.pctEnUso) < 0 || Number(f.pctEnUso) > 100))
-      e.pctEnUso = 'Ingresa un valor entre 0 y 100';
+    f.enUso.forEach((pct, i) => {
+      if (pct === '' || isNaN(Number(pct)) || Number(pct) < 0 || Number(pct) > 100)
+        e[`enUso-${i}`] = 'Ingresa un valor entre 0 y 100';
+    });
   }
   return e;
 }
@@ -33,9 +35,8 @@ export function StockModal({ open, item, isStockZone, zone, zones, onSave, onDel
           name: item.name,
           qty: String(isStockZone ? item.qtyBodega : item.qty),
           unit: item.unit ?? '',
-          pctEnUso: item.pctEnUso == null ? '' : String(item.pctEnUso),
           umbral: String(item.umbralUnidades),
-          reusable: item.reusable ?? false,
+          enUso: (item.enUso ?? []).map(u => String(u.pct)),
         });
       } else {
         setForm(EMPTY);
@@ -60,7 +61,7 @@ export function StockModal({ open, item, isStockZone, zone, zones, onSave, onDel
       name: form.name.trim(),
     };
     const payload = isStockZone
-      ? { ...base, unit: form.unit.trim(), qtyBodega: Number(form.qty), pctEnUso: form.pctEnUso === '' ? null : Number(form.pctEnUso), umbralUnidades: Number(form.umbral), reusable: form.reusable }
+      ? { ...base, unit: form.unit.trim(), qtyBodega: Number(form.qty), umbralUnidades: Number(form.umbral), enUso: form.enUso.map(pct => ({ pct: Number(pct) })) }
       : { ...base, qty: Number(form.qty) };
     onSave(payload);
   };
@@ -126,31 +127,38 @@ export function StockModal({ open, item, isStockZone, zone, zones, onSave, onDel
         )}
 
         {isStockZone && (
-          <div className="v-form-row-split">
-            <div className="v-form-row">
-              <div className="v-form-label">Unidad</div>
-              <input className="v-input" placeholder="ej: 750ml, rollo, litro…"
-                value={form.unit} onChange={e => set('unit', e.target.value)} />
-            </div>
-            <div className="v-form-row">
-              <div className="v-form-label">% en uso (opcional)</div>
-              <input className={'v-input' + (errors.pctEnUso ? ' v-input-error' : '')}
-                type="number" min="0" max="100" placeholder="ej: 30" value={form.pctEnUso}
-                onChange={e => set('pctEnUso', e.target.value)}
-                style={{ fontFamily: 'var(--font-mono)', textAlign: 'right' }} />
-              {errors.pctEnUso && <div className="v-form-error">{errors.pctEnUso}</div>}
-            </div>
+          <div className="v-form-row">
+            <div className="v-form-label">Unidad</div>
+            <input className="v-input" placeholder="ej: 750ml, rollo, litro…"
+              value={form.unit} onChange={e => set('unit', e.target.value)} />
           </div>
         )}
 
         {isStockZone && (
-          <label className="v-form-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <input type="checkbox" checked={form.reusable} onChange={e => set('reusable', e.target.checked)} />
-            <span>
-              <div className="v-form-label" style={{ marginBottom: 2 }}>Ítem reutilizable (esponja, paño…)</div>
-              <div style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>El % en uso no afectará la alerta de bajo stock — solo la cantidad en bodega.</div>
-            </span>
-          </label>
+          <div className="v-form-row">
+            <div className="v-form-label">Unidades en uso (opcional)</div>
+            {form.enUso.map((pct, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+                <input className={'v-input' + (errors[`enUso-${i}`] ? ' v-input-error' : '')}
+                  type="number" min="0" max="100" placeholder="ej: 40" value={pct}
+                  onChange={e => {
+                    const next = [...form.enUso]; next[i] = e.target.value;
+                    set('enUso', next);
+                  }}
+                  style={{ fontFamily: 'var(--font-mono)', textAlign: 'right', maxWidth: 120 }} />
+                <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>% restante</span>
+                <button className="v-btn ghost" style={{ padding: '4px 8px', marginLeft: 'auto' }}
+                  onClick={() => set('enUso', form.enUso.filter((_, j) => j !== i))}>
+                  <Icon name="trash" size={12} />
+                </button>
+                {errors[`enUso-${i}`] && <div className="v-form-error">{errors[`enUso-${i}`]}</div>}
+              </div>
+            ))}
+            <button className="v-btn ghost" style={{ marginTop: form.enUso.length ? 4 : 0 }}
+              onClick={() => set('enUso', [...form.enUso, ''])}>
+              <Icon name="plus" size={12} /> Agregar unidad en uso
+            </button>
+          </div>
         )}
 
         {confirmDel ? (

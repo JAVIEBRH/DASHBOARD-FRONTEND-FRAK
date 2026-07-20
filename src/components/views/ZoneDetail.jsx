@@ -84,8 +84,12 @@ export function ZoneDetail({ zone, zones, isStockZone, items, onBack, onSelectZo
                 <div key={item.id} className="v-stock-row" style={{ animationDelay: Math.min(i * 25, 250) + 'ms' }}>
                   <div>
                     <div className="v-stock-name">{item.name}</div>
-                    {isStockZone && item.pctEnUso != null && (
-                      <div className="v-stock-meta">Envase abierto: {item.pctEnUso}% en uso</div>
+                    {isStockZone && item.enUso?.length > 0 && (
+                      <div className="v-stock-meta">
+                        {item.enUso.length === 1
+                          ? `Envase abierto: ${item.enUso[0].pct}% en uso`
+                          : `En uso: ${item.enUso.map(u => `${u.pct}%`).join(', ')}`}
+                      </div>
                     )}
                   </div>
                   <div className="v-stock-cat">{item.category}</div>

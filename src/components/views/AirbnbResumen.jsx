@@ -153,7 +153,9 @@ export function AirbnbResumen({ estadias, limpiezas, stock, kanbanTasks, stockPr
                     ? 'Agotado'
                     : item.qtyBodega <= item.umbralUnidades
                       ? `${item.qtyBodega} / mín. ${item.umbralUnidades}`
-                      : `${item.pctEnUso}% en uso`}
+                      : item.enUso?.length > 0
+                      ? `${item.enUso.map(u => `${u.pct}%`).join(', ')} en uso`
+                      : ''}
                 </span>
               </div>
             ))}
