@@ -940,7 +940,7 @@ button { font-family: inherit; }
 .v-stock-row-head,
 .v-stock-row {
   display: grid;
-  grid-template-columns: 1fr 140px 90px 140px 48px;
+  grid-template-columns: 1fr 140px 90px 140px 76px;
   gap: 18px;
   align-items: center;
   min-width: 620px;

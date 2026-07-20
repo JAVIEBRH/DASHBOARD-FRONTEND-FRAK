@@ -97,8 +97,8 @@ export function ZoneDetail({ zone, zones, isStockZone, items, onBack, onSelectZo
                     {meta.label}
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <button className="v-btn ghost" style={{ padding: 6 }} onClick={() => onEdit(item)}>
-                      <Icon name="edit" size={13} />
+                    <button className="v-btn ghost" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => onEdit(item)}>
+                      <Icon name="edit" size={13} /> Editar
                     </button>
                   </div>
                 </div>
