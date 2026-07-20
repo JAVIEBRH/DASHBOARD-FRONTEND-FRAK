@@ -205,7 +205,8 @@ export function MonthBlock({ year, monthIndex, label, estadias, limpiezas, onBar
             );
           })}
           {stayBars.filter(b => b.rowIdx === rowIdx).map((b, i) => {
-            const tooltip = `${b.estadia.guestName}${b.estadia.monto ? ' · ' + fmtCLP(Number(b.estadia.monto), { sign: false }) : ''}`;
+            const guestPart = b.estadia.guestCount ? ` · ${b.estadia.guestCount} huésped${b.estadia.guestCount === 1 ? '' : 'es'}` : '';
+            const tooltip = `${b.estadia.guestName}${guestPart}${b.estadia.monto ? ' · ' + fmtCLP(Number(b.estadia.monto), { sign: false }) : ''}`;
             return (
               <div key={i}
                 onClick={e => { e.stopPropagation(); onBarClick(b.estadia); }}

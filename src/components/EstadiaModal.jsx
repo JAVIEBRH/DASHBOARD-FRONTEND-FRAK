@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from './ui/Icon.jsx';
 
-const EMPTY = { guestName: '', checkIn: '', checkOut: '', monto: '', notes: '' };
+const EMPTY = { guestName: '', checkIn: '', checkOut: '', guestCount: '', monto: '', notes: '' };
 
 function validate(f) {
   const e = {};
@@ -11,6 +11,7 @@ function validate(f) {
   if (!f.checkOut) e.checkOut = 'La fecha de check-out es requerida';
   if (f.checkIn && f.checkOut && f.checkOut < f.checkIn) e.checkOut = 'El check-out no puede ser antes del check-in';
   if (f.monto !== '' && (isNaN(Number(f.monto)) || Number(f.monto) < 0)) e.monto = 'Ingresa un monto válido';
+  if (f.guestCount !== '' && (!Number.isInteger(Number(f.guestCount)) || Number(f.guestCount) <= 0)) e.guestCount = 'Ingresa un número de huéspedes válido';
   return e;
 }
 
@@ -24,7 +25,7 @@ export function EstadiaModal({ open, item, defaultDate, onSave, onDelete, onClos
       if (item) {
         setForm({
           guestName: item.guestName, checkIn: item.checkIn, checkOut: item.checkOut,
-          monto: item.monto ?? '', notes: item.notes ?? '',
+          guestCount: item.guestCount ?? '', monto: item.monto ?? '', notes: item.notes ?? '',
         });
       } else {
         setForm({ ...EMPTY, checkIn: defaultDate ?? '', checkOut: defaultDate ?? '' });
@@ -48,6 +49,7 @@ export function EstadiaModal({ open, item, defaultDate, onSave, onDelete, onClos
       guestName: form.guestName.trim(),
       checkIn: form.checkIn,
       checkOut: form.checkOut,
+      guestCount: form.guestCount === '' ? null : Number(form.guestCount),
       monto: form.monto === '' ? null : Number(form.monto),
       notes: form.notes.trim(),
     });
@@ -91,6 +93,15 @@ export function EstadiaModal({ open, item, defaultDate, onSave, onDelete, onClos
               type="date" value={form.checkOut} onChange={e => set('checkOut', e.target.value)} />
             {errors.checkOut && <div className="v-form-error">{errors.checkOut}</div>}
           </div>
+        </div>
+
+        <div className="v-form-row">
+          <div className="v-form-label">Huéspedes (opcional)</div>
+          <input className={'v-input' + (errors.guestCount ? ' v-input-error' : '')}
+            type="number" min="1" step="1" placeholder="ej: 4" value={form.guestCount}
+            onChange={e => set('guestCount', e.target.value)}
+            style={{ fontFamily: 'var(--font-mono)', textAlign: 'right', maxWidth: 120 }} />
+          {errors.guestCount && <div className="v-form-error">{errors.guestCount}</div>}
         </div>
 
         <div className="v-form-row">
