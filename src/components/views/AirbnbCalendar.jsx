@@ -17,16 +17,20 @@ const TODAY = new Date().toISOString().slice(0, 10);
 // the user switches tabs — App.jsx conditionally renders this component per view.
 const lastVisibleMonth = new Map(); // propertyId -> "jul-26" token
 
-function findTopVisibleMonthToken(container) {
+function findTopVisibleMonthToken(container, scrollParent) {
   const blocks = container.querySelectorAll('[data-month-token]');
-  // Compare each block's position to the viewport's own top edge (0), not to
-  // the container's — the container scrolls in lockstep with its children
-  // (the page scrolls at `window` level), so a container-relative distance
-  // would never change as the user scrolls and would always pick the same block.
+  // Compare each block's position to the *scrolling ancestor's* top edge
+  // (`.v-content`, which stays fixed in the viewport — only its children
+  // move as it scrolls internally), not to the viewport's raw y=0: a fixed
+  // header sits above `.v-content`, so y=0 doesn't correspond to where
+  // content actually becomes visible. Also not to `container` (`.v-card`)
+  // itself — that's a child of `.v-content` and scrolls in lockstep with
+  // the month blocks, which would make the distance scroll-invariant.
+  const refTop = (scrollParent ?? container).getBoundingClientRect().top;
   let closest = null;
   let closestDist = Infinity;
   blocks.forEach(el => {
-    const dist = Math.abs(el.getBoundingClientRect().top);
+    const dist = Math.abs(el.getBoundingClientRect().top - refTop);
     if (dist < closestDist) { closestDist = dist; closest = el.dataset.monthToken; }
   });
   return closest;
@@ -267,19 +271,26 @@ export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProper
     if (!property || period !== 'all') return;
     const container = scrollCardRef.current;
     if (!container) return;
+    // The page itself never scrolls — the actual scroll container is the
+    // ancestor `.v-content` wrapper (App.jsx), which has `overflow: auto`.
+    // A 'scroll' listener on `window` never fires, since 'scroll' events on a
+    // nested scrollable element don't bubble to window.
+    const scrollParent = container.closest('.v-content') ?? container;
 
-    let ticking = false;
+    // setTimeout debounce rather than requestAnimationFrame: rAF callbacks are
+    // suspended by the browser while the tab is hidden/backgrounded, which
+    // would silently stop tracking scroll position exactly when a user
+    // switches away and back — the scenario this fix exists for.
+    let timer = null;
     const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const token = findTopVisibleMonthToken(container);
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const token = findTopVisibleMonthToken(container, scrollParent);
         if (token) lastVisibleMonth.set(property.id, token);
-        ticking = false;
-      });
+      }, 150);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    scrollParent.addEventListener('scroll', onScroll, { passive: true });
+    return () => { clearTimeout(timer); scrollParent.removeEventListener('scroll', onScroll); };
   }, [property, period]);
 
   const handleAddProperty = async (data) => {
