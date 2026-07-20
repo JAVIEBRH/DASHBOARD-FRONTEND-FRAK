@@ -1,6 +1,7 @@
 // src/components/views/StockOverview.jsx
+import { useState } from 'react';
 import { Icon } from '../ui/Icon.jsx';
-import { zoneStats, statusMeta } from '../../utils/stock.js';
+import { zoneStats, statusMeta, stockStatus } from '../../utils/stock.js';
 
 export function StockOverview({ propertyName, zones, stock, furniture, onSelectZone, onBackToProperties }) {
   const totalProductos = stock.length + furniture.length;
@@ -9,6 +10,9 @@ export function StockOverview({ propertyName, zones, stock, furniture, onSelectZ
   const stockStats = zoneStats(stock, true);
   const porAgotar = stockStats.bajoStock;
   const agotados = stockStats.agotados;
+
+  const porAgotarItems = stock.filter(i => stockStatus(i, true) === 'bajo');
+  const agotadosItems  = stock.filter(i => stockStatus(i, true) === 'agotado');
 
   return (
     <div>
@@ -29,16 +33,20 @@ export function StockOverview({ propertyName, zones, stock, furniture, onSelectZ
           <div className="v-kpi-value">{totalProductos}</div>
           <div className="v-kpi-sub">En {zones.length} zonas</div>
         </div>
-        <div className="v-kpi-cell">
-          <div className="v-kpi-label">Por agotar</div>
-          <div className="v-kpi-value" style={{ color: 'var(--jat)' }}>{porAgotar}</div>
-          <div className="v-kpi-sub">Consumibles bajo el umbral de alerta</div>
-        </div>
-        <div className="v-kpi-cell">
-          <div className="v-kpi-label">Agotados</div>
-          <div className="v-kpi-value neg">{agotados}</div>
-          <div className="v-kpi-sub">Consumibles sin unidades disponibles</div>
-        </div>
+        <KpiHoverList items={porAgotarItems} emptyLabel="Nada por agotar.">
+          <div className="v-kpi-cell" style={{ cursor: 'default' }}>
+            <div className="v-kpi-label">Por agotar</div>
+            <div className="v-kpi-value" style={{ color: 'var(--jat)' }}>{porAgotar}</div>
+            <div className="v-kpi-sub">Consumibles bajo el umbral de alerta</div>
+          </div>
+        </KpiHoverList>
+        <KpiHoverList items={agotadosItems} emptyLabel="Nada agotado.">
+          <div className="v-kpi-cell">
+            <div className="v-kpi-label">Agotados</div>
+            <div className="v-kpi-value neg">{agotados}</div>
+            <div className="v-kpi-sub">Consumibles sin unidades disponibles</div>
+          </div>
+        </KpiHoverList>
       </div>
 
       <div className="v-zone-grid">
@@ -75,6 +83,41 @@ export function StockOverview({ propertyName, zones, stock, furniture, onSelectZ
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function KpiHoverList({ items, emptyLabel, children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      style={{ position: 'relative', height: '100%' }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      {children}
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, marginTop: 8, zIndex: 20,
+          minWidth: 220, maxWidth: 300, maxHeight: 260, overflowY: 'auto',
+          background: 'var(--surface)', border: '1px solid var(--line-2)', borderRadius: 10,
+          boxShadow: 'var(--shadow-md)', padding: '10px 12px',
+        }}>
+          {items.length === 0 ? (
+            <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>{emptyLabel}</div>
+          ) : (
+            items.map(item => (
+              <div key={item.id} style={{ padding: '5px 0', fontSize: 12.5, borderBottom: '1px solid var(--line)' }}>
+                <div style={{ color: 'var(--ink)' }}>{item.name}</div>
+                <div style={{ color: 'var(--ink-3)', fontSize: 11 }}>
+                  {item.category} · {item.qtyBodega} en bodega
+                  {item.pctEnUso != null ? ` · ${item.pctEnUso}% en uso` : ''}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
