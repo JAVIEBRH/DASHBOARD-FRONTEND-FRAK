@@ -97,7 +97,7 @@ export function AirbnbKanban({
           return (
             <div key={col.status} className="v-card" style={{ padding: 14, minHeight: 300 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--brass-2)' }}>
                   {col.label}
                 </div>
                 <span style={{ fontSize: 11, color: 'var(--ink-4)', fontFamily: 'var(--font-mono)' }}>{colItems.length}</span>

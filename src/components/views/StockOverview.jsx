@@ -1,5 +1,6 @@
 // src/components/views/StockOverview.jsx
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '../ui/Icon.jsx';
 import { zoneStats, statusMeta, stockStatus } from '../../utils/stock.js';
 
@@ -92,9 +93,20 @@ function KpiHoverList({ items, emptyLabel, children }) {
   const [coords, setCoords] = useState(null);
   const cellRef = useRef(null);
 
+  // Wide enough for a 2-column grid so a realistic alert count (10-20 items)
+  // reads at a glance without an internal scrollbar, which defeated the
+  // "quick glance" purpose the popover exists for.
+  const POPOVER_WIDTH = 440;
+
   const handleEnter = () => {
     const rect = cellRef.current?.getBoundingClientRect();
-    if (rect) setCoords({ top: rect.bottom + 8, left: rect.left });
+    if (rect) {
+      // Clamp to the viewport: anchoring to `rect.left` unconditionally let the
+      // popover run off the right edge (and get visually clipped) for KPI
+      // cells near the right side of the screen, like "Agotados".
+      const left = Math.min(rect.left, window.innerWidth - POPOVER_WIDTH - 16);
+      setCoords({ top: rect.bottom + 8, left: Math.max(left, 16) });
+    }
     setOpen(true);
   };
 
@@ -106,31 +118,37 @@ function KpiHoverList({ items, emptyLabel, children }) {
       onMouseLeave={() => setOpen(false)}
     >
       {children}
-      {open && coords && (
-        // position: fixed (not absolute) so the popover escapes `.v-kpi-hero`'s
-        // `overflow: hidden` — that clip exists to round the hero's corners and
-        // isn't safe to remove, so the popover is positioned via the hovered
-        // cell's own viewport coordinates instead of relying on document flow.
+      {open && coords && createPortal(
+        // Rendered via portal to document.body, not as a nested child here:
+        // several ancestors (.v-kpi-hero, .v-content) have a CSS `animation`
+        // that sets `transform`, which makes them the containing block for
+        // `position: fixed` descendants per spec — so a fixed-position popover
+        // nested inside them is NOT actually positioned relative to the real
+        // viewport, it's offset relative to that ancestor instead. Portaling
+        // to <body> (which has no transform) sidesteps that entirely.
         <div style={{
           position: 'fixed', top: coords.top, left: coords.left, zIndex: 20,
-          minWidth: 220, maxWidth: 300, maxHeight: 260, overflowY: 'auto',
+          width: POPOVER_WIDTH, maxHeight: 340, overflowY: 'auto',
           background: 'var(--surface)', border: '1px solid var(--line-2)', borderRadius: 10,
-          boxShadow: 'var(--shadow-md)', padding: '10px 12px',
+          boxShadow: 'var(--shadow-md)', padding: '12px 14px',
         }}>
           {items.length === 0 ? (
             <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>{emptyLabel}</div>
           ) : (
-            items.map(item => (
-              <div key={item.id} style={{ padding: '5px 0', fontSize: 12.5, borderBottom: '1px solid var(--line)' }}>
-                <div style={{ color: 'var(--ink)' }}>{item.name}</div>
-                <div style={{ color: 'var(--ink-3)', fontSize: 11 }}>
-                  {item.category} · {item.qtyBodega} en bodega
-                  {item.pctEnUso != null ? ` · ${item.pctEnUso}% en uso` : ''}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16 }}>
+              {items.map(item => (
+                <div key={item.id} style={{ padding: '5px 0', fontSize: 12.5, borderBottom: '1px solid var(--line)' }}>
+                  <div style={{ color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
+                  <div style={{ color: 'var(--ink-3)', fontSize: 11 }}>
+                    {item.qtyBodega} en bodega
+                    {item.pctEnUso != null ? ` · ${item.pctEnUso}% en uso` : ''}
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
