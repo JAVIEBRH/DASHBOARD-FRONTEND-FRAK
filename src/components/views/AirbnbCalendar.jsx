@@ -19,11 +19,14 @@ const lastVisibleMonth = new Map(); // propertyId -> "jul-26" token
 
 function findTopVisibleMonthToken(container) {
   const blocks = container.querySelectorAll('[data-month-token]');
-  const containerTop = container.getBoundingClientRect().top;
+  // Compare each block's position to the viewport's own top edge (0), not to
+  // the container's — the container scrolls in lockstep with its children
+  // (the page scrolls at `window` level), so a container-relative distance
+  // would never change as the user scrolls and would always pick the same block.
   let closest = null;
   let closestDist = Infinity;
   blocks.forEach(el => {
-    const dist = Math.abs(el.getBoundingClientRect().top - containerTop);
+    const dist = Math.abs(el.getBoundingClientRect().top);
     if (dist < closestDist) { closestDist = dist; closest = el.dataset.monthToken; }
   });
   return closest;
