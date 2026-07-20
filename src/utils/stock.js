@@ -7,13 +7,27 @@ export function zoneLabel(zones, zoneId) {
 // Alertas de verdad (badge del sidebar, toast al cargar, umbral configurable) — solo aplican a
 // consumibles. Un activo fijo (mesa, sofá) no "se agota con el uso", así que no tiene umbral:
 // solo puede estar presente o faltante.
+const UMBRAL_PCT_CRITICO = 60; // fixed for every product, per the 2026-07-21 design spec
+
 export function isLowStockConsumible(item) {
-  // Reusable items (sponges, cloths) rotate constantly between "new" and
-  // "in use" — pctEnUso there tracks wear on whichever one is currently
-  // active, not overall supply, so it must never drive the alert. Supply
-  // for those is qtyBodega/umbralUnidades alone, same as a fixed asset.
-  if (item.reusable) return item.qtyBodega <= item.umbralUnidades;
-  return item.qtyBodega <= item.umbralUnidades || (item.pctEnUso != null && item.pctEnUso <= 15);
+  return item.qtyBodega <= item.umbralUnidades;
+}
+
+// Distinguishes "bajo" (need to restock soon) from "agotado" (about to
+// have literally nothing) for consumables. Bodega above the threshold is
+// always fine regardless of enUso %. Once bodega hits zero, the one thing
+// left is whatever's in enUso — if any active unit is at or below the
+// critical %, or there's nothing active either, that's "agotado"; if the
+// active unit still has meaningful life left, it's "bajo" (empty bodega,
+// but not literally out yet).
+function consumibleSeverity(item) {
+  if (item.qtyBodega > item.umbralUnidades) return 'ok';
+  if (item.qtyBodega === 0) {
+    const enUso = item.enUso ?? [];
+    const hasCriticalUnit = enUso.length === 0 || enUso.some(u => u.pct <= UMBRAL_PCT_CRITICO);
+    return hasCriticalUnit ? 'agotado' : 'bajo';
+  }
+  return 'bajo';
 }
 
 // Vocabulario de consumibles: 3 estados con umbral.
@@ -34,10 +48,7 @@ export function statusMeta(status, isStockZone) {
 }
 
 export function stockStatus(item, isStockZone) {
-  if (isStockZone) {
-    if (item.qtyBodega === 0) return 'agotado';
-    return isLowStockConsumible(item) ? 'bajo' : 'ok';
-  }
+  if (isStockZone) return consumibleSeverity(item);
   // Activos fijos: sin estado "bajo", solo presente (ok) o faltante (agotado).
   return item.qty === 0 ? 'agotado' : 'ok';
 }
