@@ -1,5 +1,5 @@
 // src/components/views/StockOverview.jsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Icon } from '../ui/Icon.jsx';
 import { zoneStats, statusMeta, stockStatus } from '../../utils/stock.js';
 
@@ -89,16 +89,30 @@ export function StockOverview({ propertyName, zones, stock, furniture, onSelectZ
 
 function KpiHoverList({ items, emptyLabel, children }) {
   const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState(null);
+  const cellRef = useRef(null);
+
+  const handleEnter = () => {
+    const rect = cellRef.current?.getBoundingClientRect();
+    if (rect) setCoords({ top: rect.bottom + 8, left: rect.left });
+    setOpen(true);
+  };
+
   return (
     <div
+      ref={cellRef}
       style={{ position: 'relative', height: '100%' }}
-      onMouseEnter={() => setOpen(true)}
+      onMouseEnter={handleEnter}
       onMouseLeave={() => setOpen(false)}
     >
       {children}
-      {open && (
+      {open && coords && (
+        // position: fixed (not absolute) so the popover escapes `.v-kpi-hero`'s
+        // `overflow: hidden` — that clip exists to round the hero's corners and
+        // isn't safe to remove, so the popover is positioned via the hovered
+        // cell's own viewport coordinates instead of relying on document flow.
         <div style={{
-          position: 'absolute', top: '100%', left: 0, marginTop: 8, zIndex: 20,
+          position: 'fixed', top: coords.top, left: coords.left, zIndex: 20,
           minWidth: 220, maxWidth: 300, maxHeight: 260, overflowY: 'auto',
           background: 'var(--surface)', border: '1px solid var(--line-2)', borderRadius: 10,
           boxShadow: 'var(--shadow-md)', padding: '10px 12px',
