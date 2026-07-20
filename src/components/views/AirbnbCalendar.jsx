@@ -1,5 +1,5 @@
 // src/components/views/AirbnbCalendar.jsx
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { Icon } from '../ui/Icon.jsx';
 import { EstadiaModal } from '../EstadiaModal.jsx';
 import { LimpiezaModal } from '../LimpiezaModal.jsx';
@@ -12,6 +12,22 @@ const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 const BAR_COLORS = ['#3B82F6', '#C97356', '#7C3AED', '#18A058', '#D97706', '#EC4899'];
 
 const TODAY = new Date().toISOString().slice(0, 10);
+
+// Module-level (not React state) so it survives AirbnbCalendar unmounting when
+// the user switches tabs — App.jsx conditionally renders this component per view.
+const lastVisibleMonth = new Map(); // propertyId -> "jul-26" token
+
+function findTopVisibleMonthToken(container) {
+  const blocks = container.querySelectorAll('[data-month-token]');
+  const containerTop = container.getBoundingClientRect().top;
+  let closest = null;
+  let closestDist = Infinity;
+  blocks.forEach(el => {
+    const dist = Math.abs(el.getBoundingClientRect().top - containerTop);
+    if (dist < closestDist) { closestDist = dist; closest = el.dataset.monthToken; }
+  });
+  return closest;
+}
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -218,6 +234,7 @@ export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProper
   const [addPropertyOpen, setAddPropertyOpen] = useState(false);
   const [estadiaModal, setEstadiaModal] = useState(null); // { item, defaultDate } | null
   const [limpiezaModal, setLimpiezaModal] = useState(null);
+  const scrollCardRef = useRef(null);
 
   const property = stockProperties.find(p => p.id === propertyId) ?? null;
   const propertyEstadias = property ? estadias.filter(e => e.property === propertyId) : [];
@@ -235,10 +252,32 @@ export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProper
     if (!property || period !== 'all') return;
     const now = new Date();
     if (yearNum !== now.getFullYear()) return;
+
+    const savedToken = lastVisibleMonth.get(property.id);
     const currentMonthToken = `${MONTH_ABBR[now.getMonth()]}-${String(yearNum).slice(-2)}`;
-    const el = document.getElementById(`airbnb-month-${currentMonthToken}`);
+    const targetToken = savedToken ?? currentMonthToken;
+    const el = document.getElementById(`airbnb-month-${targetToken}`);
     el?.scrollIntoView({ behavior: 'auto', block: 'start' });
   }, [property, period, yearNum]);
+
+  useEffect(() => {
+    if (!property || period !== 'all') return;
+    const container = scrollCardRef.current;
+    if (!container) return;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const token = findTopVisibleMonthToken(container);
+        if (token) lastVisibleMonth.set(property.id, token);
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [property, period]);
 
   const handleAddProperty = async (data) => {
     const id = await addProperty(data);
@@ -284,11 +323,11 @@ export function AirbnbCalendar({ estadias, limpiezas, stockProperties, addProper
         </div>
       </div>
 
-      <div className="v-card" style={{ padding: 24 }}>
+      <div className="v-card" ref={scrollCardRef} style={{ padding: 24 }}>
         {monthsToShow.map(m => {
           const monthIdx = MONTH_ABBR.indexOf(m.slice(0, 3));
           return (
-            <div key={m} id={`airbnb-month-${m}`}>
+            <div key={m} id={`airbnb-month-${m}`} data-month-token={m}>
               <MonthBlock
                 year={yearNum} monthIndex={monthIdx} label={monthLabels?.[m] ?? m}
                 estadias={propertyEstadias} limpiezas={propertyLimpiezas}
