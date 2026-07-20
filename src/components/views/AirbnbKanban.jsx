@@ -137,6 +137,7 @@ export function AirbnbKanban({
       <KanbanTaskModal
         open={modalTask !== undefined}
         item={modalTask ?? null}
+        propertyName={property.name}
         onClose={() => setModalTask(undefined)}
         onSave={(data) => {
           data = { ...data, property: propertyId };

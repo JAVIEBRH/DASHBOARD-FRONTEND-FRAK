@@ -4,7 +4,7 @@ import { Icon } from './ui/Icon.jsx';
 
 const EMPTY = { title: '', notes: '' };
 
-export function KanbanTaskModal({ open, item, onSave, onDelete, onClose }) {
+export function KanbanTaskModal({ open, item, propertyName, onSave, onDelete, onClose }) {
   const [form, setForm]     = useState(EMPTY);
   const [error, setError]   = useState('');
   const [confirmDel, setConfirm] = useState(false);
@@ -31,7 +31,7 @@ export function KanbanTaskModal({ open, item, onSave, onDelete, onClose }) {
       <div className="v-modal" onClick={e => e.stopPropagation()}>
         <div className="v-modal-head">
           <div>
-            <div className="v-modal-eyebrow">Airbnb · Kanban</div>
+            <div className="v-modal-eyebrow">Airbnb · Kanban · {propertyName}</div>
             <div className="v-modal-title">{isEdit ? 'Editar tarea' : 'Nueva tarea'}</div>
           </div>
           <button className="v-modal-close" onClick={onClose}>
