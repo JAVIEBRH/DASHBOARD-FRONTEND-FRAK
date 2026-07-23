@@ -16,8 +16,8 @@
   --line-2:       #CFC4AB;
   --ink:          #1A1F1B;
   --ink-2:        #4F4A40;
-  --ink-3:        #8A8270;
-  --ink-4:        #B5AC95;
+  --ink-3:        #6E6656;
+  --ink-4:        #887E63;
 
   --emerald:      #1F4034;
   --emerald-2:    #2F5D4F;
@@ -25,7 +25,7 @@
   --emerald-soft: #DCE7DF;
 
   --brass:        #C8A565;
-  --brass-2:      #A88A4F;
+  --brass-2:      #7A6236;
   --brass-soft:   #F2E5C9;
 
   --terra:        #C97356;
@@ -37,12 +37,12 @@
 
   --signal-pos:      #18A058;
   --signal-pos-soft: #D2EFE0;
-  --signal-neg:      #D43A2A;
+  --signal-neg:      #C22F20;
   --signal-neg-soft: #F8DDD9;
 
   --diego:        #2563EB;
   --diego-soft:   #DBEAFE;
-  --jat:          #D97706;
+  --jat:          #9C5304;
   --jat-soft:     #FEF3C7;
 
   --pos:          var(--signal-pos);
@@ -461,20 +461,20 @@ button { font-family: inherit; }
   display: flex; align-items: center; gap: 6px;
 }
 .v-kpi-value {
-  font-family: var(--font-serif);
-  font-size: 44px;
-  font-weight: 400;
-  letter-spacing: -0.025em;
+  font-family: var(--font-mono);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1;
   color: var(--ink);
 }
 .v-kpi-value .currency {
-  font-family: var(--font-serif);
-  font-size: 24px;
-  font-style: italic;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
   color: var(--brass-2);
-  margin-right: 4px;
-  vertical-align: 8px;
+  margin-right: 3px;
+  vertical-align: 3px;
 }
 .v-kpi-cell.primary .v-kpi-value .currency { color: var(--brass); }
 .v-kpi-value.pos { color: var(--signal-pos); }
@@ -539,6 +539,20 @@ button { font-family: inherit; }
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+.v-alert-row { transition: background 0.12s; }
+.v-alert-row:hover { background: var(--surface-2); }
+
+/* Crossfade used when switching between properties (Stock/Calendario/Kanban) —
+   the content is a full component swap, not a real dissolve, but the fade-in
+   reads as "context changed" instead of a hard cut. */
+.v-property-fade { animation: v-property-fade 0.22s ease-out both; }
+@keyframes v-property-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.v-stat-microlabel {
+  font-style: normal;
+  color: var(--ink-4);
+  margin-right: 5px;
+}
 .v-chart-legend {
   display: flex; gap: 16px;
   font-size: 11px;
@@ -558,6 +572,25 @@ button { font-family: inherit; }
 
 /* ── Transactions ── */
 .v-tx-list { display: flex; flex-direction: column; }
+.v-tx-month-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 18px 8px 8px;
+  position: sticky; top: 0; z-index: 1;
+  background: var(--surface);
+}
+.v-tx-month-head:first-child { padding-top: 4px; }
+.v-tx-month-label {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-style: italic;
+  color: var(--ink-2);
+}
+.v-tx-month-stats {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  display: flex; gap: 12px;
+}
 .v-tx-row {
   display: grid;
   grid-template-columns: 36px 1fr auto auto;
@@ -675,6 +708,8 @@ button { font-family: inherit; }
 
 .v-modal {
   width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: 20px;
@@ -711,6 +746,32 @@ button { font-family: inherit; }
 .v-input-error:focus { box-shadow: 0 0 0 3px rgba(212,58,42,0.12) !important; }
 .v-form-error { font-size: 11px; color: var(--signal-neg); font-family: var(--font-mono); margin-top: -2px; }
 .v-form-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.v-form-divider { border-top: 1px solid var(--line); margin: 6px 0 16px; }
+.v-form-section-label {
+  font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--ink-4); margin-bottom: 12px;
+}
+/* Umbral % en uso presentado como regla fija, no como otro input más */
+.v-rule-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: 10px; margin-bottom: 16px; }
+.v-rule-icon { width: 26px; height: 26px; border-radius: 7px; background: var(--emerald-soft); color: var(--emerald-2); display: grid; place-items: center; flex-shrink: 0; }
+.v-rule-text { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.v-rule-input {
+  width: 46px; padding: 3px 4px; border-radius: 5px; border: 1px solid var(--line-2); background: var(--surface);
+  color: var(--ink); font-family: var(--font-mono); font-weight: 600; font-size: 12.5px; text-align: center;
+}
+.v-rule-input.v-input-error { border-color: var(--signal-neg); }
+
+/* Envase en uso: medidor en vivo, no un campo gemelo del umbral */
+.v-gauge-card { border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; margin-bottom: 10px; }
+.v-gauge-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+.v-gauge-label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+.v-live-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.v-gauge-value { font-family: var(--font-mono); font-size: 19px; font-weight: 700; }
+.v-gauge-bar-track { height: 7px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin-bottom: 7px; }
+.v-gauge-bar-fill { height: 100%; border-radius: 999px; transition: width .15s ease, background .15s ease; }
+.v-gauge-status { font-size: 11px; margin-bottom: 8px; }
+.v-gauge-edit { display: flex; align-items: center; gap: 8px; }
+.v-gauge-edit span { font-size: 11.5px; color: var(--ink-3); }
 .v-modal-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
 
 .v-segmented {
@@ -895,6 +956,14 @@ button { font-family: inherit; }
 .v-property-card.add:hover { border-color: var(--emerald); box-shadow: none; }
 .v-property-card.add:hover .v-property-icon { background: var(--emerald-soft); color: var(--emerald); }
 
+.v-zone-section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
 .v-zone-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -908,6 +977,12 @@ button { font-family: inherit; }
   padding: 26px 28px;
   transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
+.v-zone-card.featured {
+  width: 100%;
+  padding: 30px 32px;
+  box-shadow: var(--shadow-sm);
+}
+.v-zone-card.featured .v-zone-name { font-size: 28px; }
 .v-zone-card:hover { transform: translateY(-2px); }
 .v-zone-card:active { transform: translateY(0); }
 .v-zone-name {
@@ -969,6 +1044,15 @@ button { font-family: inherit; }
 }
 .v-stock-row:last-child { border-bottom: none; }
 .v-stock-row:hover { background: var(--surface-2); }
+.v-stock-group-head {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  padding: 14px 8px 6px;
+}
+.v-stock-group-head:first-child { padding-top: 4px; }
 .v-stock-name { font-size: 15px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v-stock-meta { font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
 .v-stock-cat { font-size: 13.5px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

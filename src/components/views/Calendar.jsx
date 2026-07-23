@@ -35,9 +35,15 @@ export function Calendar({ filteredTx, monthsOrder, monthLabels, categoryMeta, o
             <div>
               <div className="v-chart-title">{label}</div>
               <div className="v-chart-sub" style={{ display: 'flex', gap: 16 }}>
-                <span style={{ color: 'var(--signal-pos)' }}>+{fmtCLP(ing, { sign: false })}</span>
-                <span style={{ color: 'var(--signal-neg)' }}>{fmtCLP(cos)}</span>
-                <span style={{ color: net >= 0 ? 'var(--signal-pos)' : 'var(--signal-neg)', fontWeight: 600 }}>= {fmtCLP(net)}</span>
+                <span style={{ color: 'var(--signal-pos)' }}>
+                  <em className="v-stat-microlabel">Ingresos</em>+{fmtCLP(ing, { sign: false })}
+                </span>
+                <span style={{ color: 'var(--signal-neg)' }}>
+                  <em className="v-stat-microlabel">Gastos</em>{fmtCLP(cos)}
+                </span>
+                <span style={{ color: net >= 0 ? 'var(--signal-pos)' : 'var(--signal-neg)', fontWeight: 600 }}>
+                  <em className="v-stat-microlabel">Neto</em>= {fmtCLP(net)}
+                </span>
               </div>
             </div>
           </div>

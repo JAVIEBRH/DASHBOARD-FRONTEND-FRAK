@@ -46,6 +46,7 @@ export default function App() {
   const [view, setView] = useState('overview');
   const [expandedGroup, setExpandedGroup] = useState(null);
   const [activePropertyId, setActivePropertyId] = useState(null);
+  const [pendingStockEditId, setPendingStockEditId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTx, setEditTx] = useState(null);
 
@@ -120,6 +121,16 @@ export default function App() {
   const stockAlertCount = agotadosCount + bajosCount;
   const stockBadgeColor = agotadosCount > 0 ? 'var(--signal-neg)' : 'var(--jat)';
 
+  // Tints the content area with each property's own color once you're
+  // "inside" it (Stock/Calendario/Kanban) — the property-picker cards use
+  // that same color, so this reads as "you're now in that property's space"
+  // instead of the background staying identical everywhere in the app.
+  const PROPERTY_SCOPED_VIEWS = ['stock', 'airbnb_calendario', 'airbnb_kanban'];
+  const activeProperty = data?.stockProperties?.find(p => p.id === activePropertyId);
+  const contentTint = PROPERTY_SCOPED_VIEWS.includes(view) && activeProperty?.color
+    ? activeProperty.color + '14'
+    : undefined;
+
   return (
     <div className="vault-app">
       <Sidebar
@@ -137,7 +148,7 @@ export default function App() {
           monthLabels={data?.monthLabels}
           onAdd={handleAdd}
         />
-        <div className="v-content" key={view}>
+        <div className="v-content" key={view} style={{ background: contentTint ?? 'var(--bg)', transition: 'background 0.25s ease' }}>
           {loading && <div className="v-empty" style={{ padding: '80px 0', textAlign: 'center' }}>Cargando datos…</div>}
           {error && <div className="v-empty" style={{ padding: '80px 0', textAlign: 'center', color: 'var(--signal-neg)' }}>Error al cargar datos. Intenta recargar la página.</div>}
           {data && !loading && (
@@ -145,7 +156,7 @@ export default function App() {
               {view === 'overview'     && <Overview {...viewProps} transactions={data.transactions} monthsOrder={monthsOrder} monthLabels={data.monthLabels} period={period} setPeriod={setPeriod} />}
               {view === 'ingresos'     && <Ingresos {...viewProps} />}
               {view === 'costos'       && <Costos {...viewProps} />}
-              {view === 'transactions' && <Transactions {...viewProps} />}
+              {view === 'transactions' && <Transactions {...viewProps} monthsOrder={monthsOrder} monthLabels={data.monthLabels} />}
               {view === 'calendar'     && <Calendar {...viewProps} monthsOrder={monthsOrder} monthLabels={data.monthLabels} />}
               {view === 'gastos'       && <Gastos {...viewProps} />}
               {view === 'socio'        && <Socio {...viewProps} properties={data.properties} />}
@@ -157,10 +168,15 @@ export default function App() {
                   addStockItem={addStockItem} editStockItem={editStockItem} deleteStockItem={deleteStockItem}
                   addFurnitureItem={addFurnitureItem} editFurnitureItem={editFurnitureItem} deleteFurnitureItem={deleteFurnitureItem}
                   showToast={showToast}
+                  initialEditItemId={pendingStockEditId}
+                  onConsumeInitialEdit={() => setPendingStockEditId(null)}
                 />
               )}
               {view === 'airbnb_resumen' && (
-                <AirbnbResumen estadias={data.estadias} limpiezas={data.limpiezas} stock={data.stock} kanbanTasks={data.kanbanTasks} stockProperties={data.stockProperties} setView={setView} />
+                <AirbnbResumen
+                  estadias={data.estadias} limpiezas={data.limpiezas} stock={data.stock} kanbanTasks={data.kanbanTasks} stockProperties={data.stockProperties} setView={setView}
+                  onOpenStockItem={(item) => { setActivePropertyId(item.property); setPendingStockEditId(item.id); setView('stock'); }}
+                />
               )}
               {view === 'airbnb_calendario' && (
                 <AirbnbCalendar

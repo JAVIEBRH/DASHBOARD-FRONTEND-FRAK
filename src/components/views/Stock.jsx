@@ -1,5 +1,5 @@
 // src/components/views/Stock.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PropertySelector } from './PropertySelector.jsx';
 import { StockOverview } from './StockOverview.jsx';
 import { ZoneDetail } from './ZoneDetail.jsx';
@@ -13,6 +13,7 @@ export function Stock({
   addStockItem, editStockItem, deleteStockItem,
   addFurnitureItem, editFurnitureItem, deleteFurnitureItem,
   showToast,
+  initialEditItemId, onConsumeInitialEdit,
 }) {
   const [zone, setZone]             = useState(null);
   const [modalOpen, setModalOpen]   = useState(false);
@@ -23,6 +24,21 @@ export function Stock({
 
   const property = stockProperties.find(p => p.id === propertyId) ?? null;
   const zones = property ? [{ id: 'stock', label: 'Stock' }, ...property.zones] : [];
+
+  // Deep-link from other views (e.g. a stock alert on the Airbnb Resumen page):
+  // jump straight into this item's edit modal instead of dropping the user on
+  // the property/zone picker to find it themselves.
+  useEffect(() => {
+    if (!initialEditItemId) return;
+    const item = stock.find(s => s.id === initialEditItemId);
+    if (item) {
+      setZone('stock');
+      setEditItem(item);
+      setModalOpen(true);
+    }
+    onConsumeInitialEdit?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialEditItemId]);
 
   const propertyStock     = property ? stock.filter(s => s.property === propertyId) : [];
   const propertyFurniture = property ? furniture.filter(f => f.property === propertyId) : [];
@@ -78,7 +94,7 @@ export function Stock({
   }
 
   return (
-    <div>
+    <div key={property.id} className="v-property-fade">
       {zone === null ? (
         <StockOverview
           propertyName={property.name}

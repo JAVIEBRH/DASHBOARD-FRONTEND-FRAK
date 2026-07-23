@@ -5,6 +5,7 @@ import { DonutChart } from '../charts/DonutChart.jsx';
 import { MonthlyBars } from '../charts/MonthlyBars.jsx';
 import { fmtCLP, fmtCLPParts, fmtDate } from '../../utils/formatters.js';
 import { catColor, catLabel } from '../../utils/categories.js';
+import { useCountUp } from '../../hooks/useCountUp.js';
 
 export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, categoryMeta, onEdit, onAdd, period, setPeriod }) {
   const [catTab, setCatTab] = useState('expense');
@@ -16,9 +17,13 @@ export function Overview({ filteredTx, transactions, monthsOrder, monthLabels, c
   const margen    = income + expenseOp;
   const margenPct = income > 0 ? (margen / income) * 100 : 0;
 
-  const incParts = fmtCLPParts(income, { compact: true });
-  const cosParts = fmtCLPParts(expenseOp, { compact: true });
-  const netParts = fmtCLPParts(margen, { compact: true });
+  const incomeAnim = useCountUp(income);
+  const expenseOpAnim = useCountUp(expenseOp);
+  const margenAnim = useCountUp(margen);
+
+  const incParts = fmtCLPParts(incomeAnim, { compact: true });
+  const cosParts = fmtCLPParts(expenseOpAnim, { compact: true });
+  const netParts = fmtCLPParts(margenAnim, { compact: true });
 
   const allMonthLabels = monthsOrder.map(m => monthLabels?.[m] ?? m);
   const monthlyIncome    = monthsOrder.map(m => txs.filter(t => t.month === m && t.bucket === 'income').reduce((s, t) => s + t.amount, 0));

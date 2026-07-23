@@ -74,7 +74,7 @@ export function AirbnbKanban({
   }
 
   return (
-    <div>
+    <div key={property.id} className="v-property-fade">
       <div className="v-section-head">
         <div>
           <div className="v-eyebrow">Airbnb · {property.name}</div>

@@ -20,7 +20,9 @@ export function PropertySelector({
       <div className="v-property-grid">
         {properties.map(p => (
           <button key={p.id} className="v-card v-property-card" onClick={() => onSelect(p.id)}>
-            <div className="v-property-icon"><Icon name="home" size={28} /></div>
+            <div className="v-property-icon" style={p.color ? { background: p.color + '1f', color: p.color } : undefined}>
+              <Icon name={p.kind === 'departamento' ? 'building' : 'home'} size={28} />
+            </div>
             <div className="v-property-name">{p.name}</div>
           </button>
         ))}

@@ -8,14 +8,26 @@ export function ZoneDetail({ zone, zones, isStockZone, items, onBack, onSelectZo
   const [categoryFilter, setCategoryFilter]  = useState('');
   const [statusFilter, setStatusFilter]      = useState('');
 
-  const categories = [...new Set(items.map(i => i.category))].sort();
+  const categories = [...new Set(items.map(i => i.category))].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
-  const filtered = items.filter(i => {
-    if (search && !i.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (categoryFilter && i.category !== categoryFilter) return false;
-    if (statusFilter && stockStatus(i, isStockZone) !== statusFilter) return false;
-    return true;
-  });
+  const filtered = items
+    .filter(i => {
+      if (search && !i.name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (categoryFilter && i.category !== categoryFilter) return false;
+      if (statusFilter && stockStatus(i, isStockZone) !== statusFilter) return false;
+      return true;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+
+  // Agrupados por categoría (orden alfabético) para que productos similares
+  // (ej. varios "Cloro" cargados en momentos distintos) queden juntos en vez
+  // de dispersos según el orden de inserción en la base.
+  const grouped = new Map();
+  for (const item of filtered) {
+    if (!grouped.has(item.category)) grouped.set(item.category, []);
+    grouped.get(item.category).push(item);
+  }
+  const groupedCategories = [...grouped.keys()].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
   return (
     <div>
@@ -76,38 +88,43 @@ export function ZoneDetail({ zone, zones, isStockZone, items, onBack, onSelectZo
               <span>Estado</span>
               <span></span>
             </div>
-            {filtered.map((item, i) => {
-              const status = stockStatus(item, isStockZone);
-              const meta = statusMeta(status, isStockZone);
-              const qty = isStockZone ? item.qtyBodega : item.qty;
-              return (
-                <div key={item.id} className="v-stock-row" style={{ animationDelay: Math.min(i * 25, 250) + 'ms' }}>
-                  <div>
-                    <div className="v-stock-name">{item.name}</div>
-                    {isStockZone && item.enUso?.length > 0 && (
-                      <div className="v-stock-meta">
-                        {item.enUso.length === 1
-                          ? `Envase abierto: ${item.enUso[0].pct}% en uso`
-                          : `En uso: ${item.enUso.map(u => `${u.pct}%`).join(', ')}`}
+            {groupedCategories.map(cat => (
+              <div key={cat}>
+                <div className="v-stock-group-head">{cat}</div>
+                {grouped.get(cat).map((item, i) => {
+                  const status = stockStatus(item, isStockZone);
+                  const meta = statusMeta(status, isStockZone);
+                  const qty = isStockZone ? item.qtyBodega : item.qty;
+                  return (
+                    <div key={item.id} className="v-stock-row" style={{ animationDelay: Math.min(i * 25, 250) + 'ms' }}>
+                      <div>
+                        <div className="v-stock-name">{item.name}</div>
+                        {isStockZone && item.enUso?.length > 0 && (
+                          <div className="v-stock-meta">
+                            {item.enUso.length === 1
+                              ? `Envase abierto: ${item.enUso[0].pct}% en uso`
+                              : `En uso: ${item.enUso.map(u => `${u.pct}%`).join(', ')}`}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="v-stock-cat">{item.category}</div>
-                  <div className="v-stock-qty">
-                    {qty}{isStockZone && <span className="thresh">mín. {item.umbralUnidades}</span>}
-                  </div>
-                  <div className="v-stock-status" style={{ color: meta.color }}>
-                    <i className="dot" style={{ background: meta.color }} />
-                    {meta.label}
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <button className="v-btn ghost" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => onEdit(item)}>
-                      <Icon name="edit" size={13} /> Editar
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                      <div className="v-stock-cat">{item.category}</div>
+                      <div className="v-stock-qty">
+                        {qty}{isStockZone && <span className="thresh">mín. {item.umbralUnidades}</span>}
+                      </div>
+                      <div className="v-stock-status" style={{ color: meta.color }}>
+                        <i className="dot" style={{ background: meta.color }} />
+                        {meta.label}
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <button className="v-btn ghost" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => onEdit(item)}>
+                          <Icon name="edit" size={13} /> Editar
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         )}
       </div>

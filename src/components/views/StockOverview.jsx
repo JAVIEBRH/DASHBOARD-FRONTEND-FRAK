@@ -12,8 +12,12 @@ export function StockOverview({ propertyName, zones, stock, furniture, onSelectZ
   const porAgotar = stockStats.bajoStock;
   const agotados = stockStats.agotados;
 
-  const porAgotarItems = stock.filter(i => stockStatus(i, true) === 'bajo');
-  const agotadosItems  = stock.filter(i => stockStatus(i, true) === 'agotado');
+  const byName = (a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+  const porAgotarItems = stock.filter(i => stockStatus(i, true) === 'bajo').sort(byName);
+  const agotadosItems  = stock.filter(i => stockStatus(i, true) === 'agotado').sort(byName);
+
+  const stockZone = zones.find(z => z.id === 'stock');
+  const furnitureZones = zones.filter(z => z.id !== 'stock');
 
   return (
     <div>
@@ -50,41 +54,61 @@ export function StockOverview({ propertyName, zones, stock, furniture, onSelectZ
         </KpiHoverList>
       </div>
 
-      <div className="v-zone-grid">
-        {zones.map(z => {
-          const isStockZone = z.id === 'stock';
-          const zoneItems = isStockZone ? stock : furniture.filter(f => f.zone === z.id);
-          const stats = zoneStats(zoneItems, isStockZone);
-          const ok = stats.total - stats.bajoStock - stats.agotados;
-          const pct = (n) => stats.total === 0 ? 0 : (n / stats.total) * 100;
-          const criticalLabel = isStockZone ? 'agotado' : 'faltante';
+      {stockZone && (
+        <div style={{ marginBottom: 26 }}>
+          <div className="v-zone-section-label">Consumibles · se actualiza con el uso</div>
+          <ZoneCard z={stockZone} stock={stock} furniture={furniture} onSelectZone={onSelectZone} featured
+            accentColor={agotados > 0 ? 'var(--signal-neg)' : porAgotar > 0 ? 'var(--jat)' : 'var(--emerald)'} />
+        </div>
+      )}
 
-          return (
-            <button key={z.id} className="v-card v-zone-card" onClick={() => onSelectZone(z.id)}>
-              <div className="v-zone-name">{z.label}</div>
-              <div className="v-zone-count">{stats.total} producto{stats.total === 1 ? '' : 's'}</div>
-
-              {stats.total > 0 ? (
-                <>
-                  <div className="v-zone-bar">
-                    {ok > 0 && <span style={{ width: pct(ok) + '%', background: statusMeta('ok', isStockZone).color }} />}
-                    {stats.bajoStock > 0 && <span style={{ width: pct(stats.bajoStock) + '%', background: 'var(--jat)' }} />}
-                    {stats.agotados > 0 && <span style={{ width: pct(stats.agotados) + '%', background: statusMeta('agotado', isStockZone).color }} />}
-                  </div>
-                  <div className="v-zone-legend">
-                    {stats.agotados > 0 && <span><i className="dot" style={{ background: statusMeta('agotado', isStockZone).color }} />{stats.agotados} {criticalLabel}{stats.agotados === 1 ? '' : 's'}</span>}
-                    {stats.bajoStock > 0 && <span><i className="dot" style={{ background: 'var(--jat)' }} />{stats.bajoStock} bajo{stats.bajoStock === 1 ? '' : 's'}</span>}
-                    {stats.agotados === 0 && stats.bajoStock === 0 && <span><i className="dot" style={{ background: statusMeta('ok', isStockZone).color }} />Todo en orden</span>}
-                  </div>
-                </>
-              ) : (
-                <div className="v-zone-legend">Sin productos registrados</div>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {furnitureZones.length > 0 && (
+        <>
+          <div className="v-zone-section-label">Activos fijos · por zona</div>
+          <div className="v-zone-grid">
+            {furnitureZones.map(z => (
+              <ZoneCard key={z.id} z={z} stock={stock} furniture={furniture} onSelectZone={onSelectZone} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
+  );
+}
+
+function ZoneCard({ z, stock, furniture, onSelectZone, featured, accentColor }) {
+  const isStockZone = z.id === 'stock';
+  const zoneItems = isStockZone ? stock : furniture.filter(f => f.zone === z.id);
+  const stats = zoneStats(zoneItems, isStockZone);
+  const ok = stats.total - stats.bajoStock - stats.agotados;
+  const pct = (n) => stats.total === 0 ? 0 : (n / stats.total) * 100;
+  const criticalLabel = isStockZone ? 'agotado' : 'faltante';
+
+  return (
+    <button
+      className={`v-card v-zone-card${featured ? ' featured' : ''}`}
+      style={featured ? { borderLeft: `4px solid ${accentColor}` } : undefined}
+      onClick={() => onSelectZone(z.id)}>
+      <div className="v-zone-name">{z.label}</div>
+      <div className="v-zone-count">{stats.total} producto{stats.total === 1 ? '' : 's'}</div>
+
+      {stats.total > 0 ? (
+        <>
+          <div className="v-zone-bar">
+            {ok > 0 && <span style={{ width: pct(ok) + '%', background: statusMeta('ok', isStockZone).color }} />}
+            {stats.bajoStock > 0 && <span style={{ width: pct(stats.bajoStock) + '%', background: 'var(--jat)' }} />}
+            {stats.agotados > 0 && <span style={{ width: pct(stats.agotados) + '%', background: statusMeta('agotado', isStockZone).color }} />}
+          </div>
+          <div className="v-zone-legend">
+            {stats.agotados > 0 && <span><i className="dot" style={{ background: statusMeta('agotado', isStockZone).color }} />{stats.agotados} {criticalLabel}{stats.agotados === 1 ? '' : 's'}</span>}
+            {stats.bajoStock > 0 && <span><i className="dot" style={{ background: 'var(--jat)' }} />{stats.bajoStock} bajo{stats.bajoStock === 1 ? '' : 's'}</span>}
+            {stats.agotados === 0 && stats.bajoStock === 0 && <span><i className="dot" style={{ background: statusMeta('ok', isStockZone).color }} />Todo en orden</span>}
+          </div>
+        </>
+      ) : (
+        <div className="v-zone-legend">Sin productos registrados</div>
+      )}
+    </button>
   );
 }
 

@@ -13,6 +13,16 @@ export function isLowStockConsumible(item) {
   return item.qtyBodega <= item.umbralUnidades;
 }
 
+// Productos con umbralPctEnUso seteado (cloro, cif, detergente, quitamanchas...)
+// se compran de a un envase a la vez: lo que importa es cuánto le queda al que
+// está abierto ahora mismo, no cuántos hay en bodega — así que la alerta se
+// basa pura y exclusivamente en ese %, con el umbral propio de cada producto.
+function pctEnUsoSeverity(item) {
+  const activa = item.enUso?.[0];
+  if (!activa) return 'agotado'; // nada abierto y nada en bodega para abrir
+  return activa.pct <= item.umbralPctEnUso ? 'agotado' : 'ok';
+}
+
 // Distinguishes "bajo" (need to restock soon) from "agotado" (about to
 // have literally nothing) for consumables. Bodega above the threshold is
 // always fine regardless of enUso %. Once bodega hits zero, the one thing
@@ -21,6 +31,7 @@ export function isLowStockConsumible(item) {
 // active unit still has meaningful life left, it's "bajo" (empty bodega,
 // but not literally out yet).
 function consumibleSeverity(item) {
+  if (item.umbralPctEnUso != null) return pctEnUsoSeverity(item);
   if (item.qtyBodega > item.umbralUnidades) return 'ok';
   if (item.qtyBodega === 0) {
     const enUso = item.enUso ?? [];

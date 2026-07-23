@@ -1,6 +1,7 @@
 // src/components/ui/Icon.jsx — 20×20 viewBox, line-art editorial
 const ICONS = {
   home:          'M3 10.5L10 4l7 6.5V17a1 1 0 01-1 1h-3v-5H7v5H4a1 1 0 01-1-1v-6.5z',
+  building:      'M6 17V3h8v14M4 17h12M8 6h1M11 6h1M8 9h1M11 9h1M8 12h1M11 12h1',
   rows:          'M3 5h14M3 10h14M3 15h14',
   calendar:      'M4 6h12v10a1 1 0 01-1 1H5a1 1 0 01-1-1V6zM4 6V4.5a.5.5 0 01.5-.5h11a.5.5 0 01.5.5V6M7 3v3M13 3v3',
   chart:         'M3 16V8m5 8V4m5 12v-6m5 6V11',
